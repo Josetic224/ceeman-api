@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  UserID String  @id @default(cuid()) @map("_id")
+  fullName String
+  email    String  @unique
+  password String?
+  address  String
+  phone_Number String
+  googleId  String? @unique
+  Session  Session[]
+  Orders Orders[]
+  Reviews Reviews[]
+  cartItems CartItems[]
+   role    String   @default("user") // Role can be "user" or "admin"
+}
+
+model Session {
+  id       String   @id @default(cuid()) @map("_id")
+  userId   String
+  User     User  @relation(fields: [userId], references: [UserID])
+  data     String
+  expires  DateTime
+}
+
+// enum Category {
+//   generators
+//   solar
+// }
+
+model Products {
+  ProductID String @id @default(cuid()) @map("_id")
+  name String
+  description String
+  price Float
+  category String @default("generators")
+  imageUrl String
+  orderItems OrderItems[]
+  Reviews Reviews[]
+  cartItems CartItems[]
+}
+
+enum Status {
+  pending
+  shipped
+  delivered
+}
+
+model Orders {
+  OrderID String @id @default(cuid()) @map("_id")
+  UserID String // Foreign key reference to User
+  User User @relation(fields: [UserID], references: [UserID])
+  orderDate DateTime
+  total BigInt
+  status Status @default(pending)
+  orderItems OrderItems[]
+  Payments  Payments[]
+}
+
+model CartItems {
+  CartItemID String @id @default(cuid()) @map("_id")
+  UserID String
+  User User @relation(fields: [UserID], references: [UserID])
+  ProductID String
+  Products Products @relation(fields: [ProductID], references: [ProductID])
+  quantity Int @default(1)
+  unitPrice Float
+}
+model OrderItems {
+  OrderItemID String @id @default(cuid()) @map("_id")
+  OrderID String
+  Orders Orders @relation(fields: [OrderID], references: [OrderID])
+  ProductID String
+  Products Products @relation(fields: [ProductID], references: [ProductID])
+
+  quantity Int // Number of ordered items
+  unitPrice Float
+}
+
+model Payments {
+  PaymentID String @id @default(cuid()) @map("_id")
+  OrderID String
+  Orders Orders @relation(fields: [OrderID], references: [OrderID])
+  paymentMethod String
+  PaymentDate DateTime
+  Amount BigInt
+}
+
+model Reviews {
+  ReviewID String @id @default(cuid()) @map("_id")
+  ProductID String
+  Products Products @relation(fields: [ProductID], references: [ProductID])
+  UserID String // Foreign key reference to User
+  User User @relation(fields: [UserID], references: [UserID])
+}
+
+model Categories {
+  CategoryID String @id @default(cuid()) @map("_id")
+  name String 
+  description String
+}
+model BlacklistToken {
+  id        String   @id @default(cuid()) @map("_id")
+  token     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Agent{
+  AgentID String @id @default(cuid()) @map("_id")
+  fullName String
+  email String
+  officeAddress String
+  State String
+  phoneNumber String
+  WhyYouWantToBeACeeManAgent String
+}
+model Contact {
+   contactID String @id @default(cuid()) @map("_id")
+   email String 
+   request String
+
+}
+
+
