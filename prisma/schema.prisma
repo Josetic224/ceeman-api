@@ -12,8 +12,6 @@ model User {
   fullName String
   email    String  @unique
   password String?
-  address  String
-  phone_Number String
   googleId  String?
   Session  Session[]
   Orders Orders[]
@@ -136,6 +134,8 @@ model location {
     User User @relation(fields: [UserID], references: [UserID])
   state String
   city String
+    address  String
+  phone_Number String
 }
 
 

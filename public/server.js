@@ -1,14 +1,8 @@
 const express = require('express');
 const app = express();
 const cors = require('cors')
-const dotenv = require('dotenv')
-dotenv.config({ path: ".env" });
-const session = require('express-session');
-const {connectToDatabase, prisma} = require('../db/user.db.js');
-const passport = require('passport');
-require('../config/passport-google')
 const corsOptions = {
-  origin:"http://localhost:5000" || "*",
+  origin:"http://localhost:3000" || "*",
   credentials:true,
   methods:["GET","POST", "PUT", "DELETE"],
   allowHeaders:[
@@ -17,6 +11,13 @@ const corsOptions = {
     "Access-Control-Allow-Credentials",
   ],
 };
+const dotenv = require('dotenv')
+dotenv.config({ path: ".env" });
+const session = require('express-session');
+const {connectToDatabase, prisma} = require('../db/user.db.js');
+const passport = require('passport');
+require('../config/passport-google')
+
 const googleRouter = require('../routers/api/router-google.js')
 
 

@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { uploadImageToCloudinary, createProduct, getProducts, getUserById, getProduct } = require("../db/user.db");
+const { uploadImageToCloudinary, createProduct, getUserById, getProduct } = require("../db/user.db");
 const { formatServerError, unAuthorized, badRequest } = require("../helpers/error");
 const prisma = new PrismaClient
 

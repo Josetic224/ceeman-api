@@ -385,8 +385,50 @@ const getTotalAmountInCart = async (userId) => {
   }
 };
 
+const fetchStates = async () => {
+  try {
+    const response = await axios.get('https://api.facts.ng/v1/states');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching states:', error);
+    throw new Error('Failed to fetch states');
+  }
+};
+
+const fetchStateDetails = async (stateId) => {
+  try {
+    const response = await axios.get(`https://api.facts.ng/v1/states/${stateId}`);
+    return response.data.lgas;
+  } catch (error) {
+    console.error(`Error fetching details for state ${stateId}:`, error);
+    throw new Error('Failed to fetch state details');
+  }
+};
+
+
+const getStatesWithCities = async () => {
+  try {
+    const states = await fetchStates();
+    const statesWithCities = [];
+
+    for (const state of states) {
+      const cities = await fetchStateDetails(state.id);
+      statesWithCities.push({
+        state: state.name,
+        id: state.id,
+        cities
+      });
+    }
+
+    return statesWithCities;
+  } catch (error) {
+    console.error('Error combining states and cities:', error);
+    throw new Error('Failed to combine states and cities');
+  }
+};
 
    module.exports = {
+    getStatesWithCities,
     getTotalCartItems,
     viewCartItems,
     uploadImageToCloudinary,
