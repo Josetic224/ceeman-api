@@ -14,7 +14,7 @@ model User {
   password String?
   address  String
   phone_Number String
-  googleId  String? @unique
+  googleId  String?
   Session  Session[]
   Orders Orders[]
   Reviews Reviews[]
