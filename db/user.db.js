@@ -77,8 +77,6 @@ const getUserByEmail =  async (email) =>
           fullName,
           email,
           password: hashedPassword, // Store hashed password in the database
-          address: '',
-          phone_Number:'',
           role:"user",
           googleId:null
         }
