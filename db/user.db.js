@@ -79,7 +79,8 @@ const getUserByEmail =  async (email) =>
           password: hashedPassword, // Store hashed password in the database
           address: '',
           phone_Number:'',
-          role:"user"
+          role:"user",
+          googleId:''
         }
       });
   
@@ -230,41 +231,27 @@ const viewCartItems = async(userId)=>{
   return cartItems
 }
 
-const increaseCartItems = async (userId, productId, amount) => {
+const increaseCartItems = async (userId, cartItemId, amount) => {
   try {
-    // Find the product to get its price
-    const product = await prisma.products.findUnique({
-      where: { ProductID: productId },
+    // Find the cart item by cartItemId
+    let cartItem = await prisma.cartItems.findUnique({
+      where: { CartItemID: cartItemId },
+      include: { Products: true }
     });
 
-    if (!product) {
-      throw new Error('Product not found');
+    if (!cartItem || cartItem.UserID !== userId) {
+      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
+      throw new Error('Cart item not found');
     }
 
-    // Find the cart item for the user and product
-    let cartItem = await prisma.cartItems.findUnique({
-      where: {
-        UserID_ProductID: {
-          UserID: userId,
-          ProductID: productId,
-        },
+    // Increase the quantity and update unit price
+    cartItem = await prisma.cartItems.update({
+      where: { CartItemID: cartItem.CartItemID },
+      data: {
+        quantity: cartItem.quantity + amount,
+        unitPrice: cartItem.Products.price * (cartItem.quantity + amount), // Adjust unit price based on new quantity
       },
     });
-
-    // If the item exists in the cart, increase the quantity and update unit price
-    if (cartItem) {
-      cartItem = await prisma.cartItems.update({
-        where: {
-          CartItemID: cartItem.CartItemID,
-        },
-        data: {
-          quantity: cartItem.quantity + amount,
-          unitPrice: product.price * (cartItem.quantity + amount), // Adjust unit price based on new quantity
-        },
-      });
-    } else {
-      throw new Error('Cart item not found'); // Handle case where cart item should exist but doesn't
-    }
 
     // Return the updated cart item
     return cartItem;
@@ -276,32 +263,29 @@ const increaseCartItems = async (userId, productId, amount) => {
 
 
 
-const decreaseCartItems = async (userId, productId, amount) => {
+const decreaseCartItems = async (userId, cartItemId, amount) => {
   try {
-    // Find the cart item for the user and product
+    // Find the cart item by cartItemId
     let cartItem = await prisma.cartItems.findUnique({
-      where: {
-        UserID_ProductID: {
-          UserID: userId,
-          ProductID: productId,
-        },
-      },
+      where: { CartItemID: cartItemId },
+      include: { Products: true }
     });
 
-    if (!cartItem) {
-      throw new Error('Item not found in cart');
+    if (!cartItem || cartItem.UserID !== userId) {
+      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
+      throw new Error('Cart item not found');
     }
 
     // Find the product to get its price
     const product = await prisma.products.findUnique({
-      where: { ProductID: productId },
+      where: { ProductID: cartItem.ProductID },
     });
 
     if (!product) {
       throw new Error('Product not found');
     }
 
-    // Calculate new quantity and unit price
+    // Calculate new quantity
     const newQuantity = cartItem.quantity - amount;
     let updatedCartItem;
 
@@ -313,7 +297,7 @@ const decreaseCartItems = async (userId, productId, amount) => {
         },
         data: {
           quantity: newQuantity,
-          unitPrice: cartItem.unitPrice - product.price * amount,
+          unitPrice: product.price * newQuantity, // Adjust unit price based on new quantity
         },
       });
     } else {
@@ -323,6 +307,7 @@ const decreaseCartItems = async (userId, productId, amount) => {
           CartItemID: cartItem.CartItemID,
         },
       });
+      return { message: 'Item removed from cart' };
     }
 
     return updatedCartItem || { message: 'Item removed from cart' };
@@ -332,52 +317,77 @@ const decreaseCartItems = async (userId, productId, amount) => {
   }
 };
 
-const deleteItems = async(userId, productId)=>{
-  try{
 
+const deleteItemsInCart = async (userId, cartItemId) => {
+  try {
+    // Find the cart item by CartItemId
+    const cartItem = await prisma.cartItems.findUnique({
+      where: { CartItemID: cartItemId },
+    });
 
-  const cartItem = await prisma.cartItems.findUnique({
-    where: {
-      UserID_ProductID: {
-        UserID: userId,
-        ProductID: productId,
+    // If cart item is not found or doesn't belong to the user, throw an error
+    if (!cartItem || cartItem.UserID !== userId) {
+      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
+      throw new Error('Cart item not found');
+    }
+
+    // Delete the cart item
+    await prisma.cartItems.delete({
+      where: {
+        CartItemID: cartItemId,
       },
-    },
-  });
+    });
 
-  if (!cartItem) {
-    return res.status(404).json({ error: 'Item not found in cart' });
+    return { message: 'Item deleted from cart' };
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to delete item from cart');
   }
-
-  // Delete the cart item
-  await prisma.cartItems.delete({
-    where: {
-      CartItemID: cartItem.CartItemID,
-    },
-  });
-}catch(error){
-  console.error(error)
-  throw new Error("Items could not be deleted")
-}
-}
-
-const totalNumberCartItems = async(userId)=>{
-try {
-  const totalItems = await prisma.cartItems.count({
-    where:{UserID:userId}
-  })
-  return totalItems
-} catch (error) {
-  console.error(error)
-  throw new Error("no items found")
-}
-}
+};
 
 
+
+const getTotalCartItems = async (userId) => {
+  try {
+    const totalItems = await prisma.cartItems.count({
+      where: { UserID: userId }
+    });
+
+    return totalItems;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to retrieve total number of items');
+  }
+};
+
+const getTotalAmountInCart = async (userId) => {
+  try {
+    // Find all cart items for the user
+    const cartItems = await prisma.cartItems.findMany({
+      where: { UserID: userId },
+      include: { Products: true }, // Include Products to access price
+    });
+
+    if (!cartItems || cartItems.length === 0) {
+      return 0; // If no items in cart, return 0
+    }
+
+    // Calculate total amount
+    let totalAmount = 0;
+    cartItems.forEach((cartItem) => {
+      totalAmount += cartItem.quantity * cartItem.Products.price;
+    });
+
+    return totalAmount;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to calculate total amount in cart');
+  }
+};
 
 
    module.exports = {
-    totalNumberCartItems,
+    getTotalCartItems,
     viewCartItems,
     uploadImageToCloudinary,
     loginUser,
@@ -392,5 +402,6 @@ try {
     createUser,
     getUserByEmail,
     getUserById,
-    deleteItems
+    deleteItemsInCart,
+    getTotalAmountInCart
    }
