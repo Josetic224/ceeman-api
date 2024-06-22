@@ -17,19 +17,10 @@ const createProductController = async (req, res) => {
       console.log(imageUrl);
       const newProduct = await createProduct(name, description, price, category, imageUrl);
       console.log(newProduct);
-      const numericPrice = parseFloat(price.replace(/,/g, ''));
-
-      // Format the numeric price with 2 decimal places and add thousand separators
-      const formattedPrice = `₦${numericPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-      
+     
   
-      // Add formatted price to the newProduct object
-      const productWithFormattedPrice = {
-        ...newProduct,
-        price: formattedPrice // Update the price field to the formatted price
-      };
-  
-      res.status(201).json(productWithFormattedPrice);
+    
+      res.status(201).json(newProduct);
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(500).json({ error: "Failed to create product" });
@@ -37,20 +28,40 @@ const createProductController = async (req, res) => {
   };
   
 
-
   const viewProducts = async (req, res) => {
-    const userId = req.user.id
-  
     try {
       const products = await prisma.products.findMany();
   
-      return res.status(200).json(products);
+      if (!products || products.length === 0) {
+        return res.status(404).json({ message: "No products found" });
+      }
+  
+      // Format the prices for all products
+      const formattedProducts = products.map(product => {
+        if (typeof product.price !== 'number') {
+          console.error('Invalid price format for product:', product.id);
+          return {
+            ...product,
+            price: 'Invalid price format'
+          };
+        }
+  
+        // Format the price with the Naira symbol
+        const formattedPrice = `₦${product.price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  
+        return {
+          ...product,
+          price: formattedPrice, // Overwrite the price field with the formatted price
+        };
+      });
+  
+      return res.status(200).json(formattedProducts);
     } catch (error) {
-      console.log(error.message);
+      console.error('Error retrieving products:', error.message);
       return res.status(500).json({ message: "Server error" });
     }
   };
-  
+
   const viewProduct = async(req, res)=>{
     const userId = req.user.id
     const productId = req.params.productId

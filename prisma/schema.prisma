@@ -19,6 +19,7 @@ model User {
   Orders Orders[]
   Reviews Reviews[]
   cartItems CartItems[]
+  location location[]
    role    String   @default("user") // Role can be "user" or "admin"
 }
 
@@ -72,6 +73,7 @@ model CartItems {
   Products Products @relation(fields: [ProductID], references: [ProductID])
   quantity Int @default(1)
   unitPrice Float
+  @@unique([UserID,ProductID])
 }
 model OrderItems {
   OrderItemID String @id @default(cuid()) @map("_id")
@@ -126,6 +128,14 @@ model Contact {
    email String 
    request String
 
+}
+
+model location {
+  locationID String @id @default(cuid()) @map("_id")
+  UserID String
+    User User @relation(fields: [UserID], references: [UserID])
+  state String
+  city String
 }
 
 
