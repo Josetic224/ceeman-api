@@ -99,7 +99,7 @@ if(!user || !compareSync(password, user.password)){
   throw new Error("Invalid credentials")
 }
 const jwtSecret = process.env.JWT_SECRET
-const token = sign({id:user.UserID, role:user.role}, jwtSecret, {expiresIn:'1h'})
+const token = sign({id:user.UserID, role:user.role}, jwtSecret, {expiresIn:'7d'})
     return token ;
   };
   
@@ -395,7 +395,7 @@ const fetchStates = async () => {
 
 const fetchStateDetails = async (stateId) => {
   try {
-    const response = await axios.get(`https://api.facts.ng/v1/states/${stateId}`);
+    const response = await axios.get(`https://api.facts.ng/v1/states`);
     return response.data.lgas;
   } catch (error) {
     console.error(`Error fetching details for state ${stateId}:`, error);
