@@ -80,7 +80,7 @@ const getUserByEmail =  async (email) =>
           address: '',
           phone_Number:'',
           role:"user",
-          googleId:''
+          googleId:null
         }
       });
   
