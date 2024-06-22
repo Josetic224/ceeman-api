@@ -15,7 +15,7 @@ exports.logIn = async(req, res) =>{
     let existingUser =  await getUserByEmail(email)
      
     if(!existingUser){
-        return badRequest(res, "This Email does exists")
+        return res.status(401)("This Email does exists")
     }
      const signUser= await loginUser(email,password)
 

@@ -13,7 +13,7 @@ module.exports = function routes(app) {
     app.use("/api", signupRouter);
     app.use("/api", loginRouter);
     app.use("/api", productRouter)
-    app.use("api", cartRouter )
+    app.use("/api", cartRouter )
   
    
   };

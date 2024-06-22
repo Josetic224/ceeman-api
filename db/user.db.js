@@ -97,7 +97,7 @@ const getUserByEmail =  async (email) =>
     const user = await getUserByEmail(email)
 
 if(!user || !compareSync(password, user.password)){
-  return unAuthenticated(res, "Invalid credentials")
+  throw new Error("Invalid credentials")
 }
 const jwtSecret = process.env.JWT_SECRET
 const token = sign({id:user.UserID, role:user.role}, jwtSecret, {expiresIn:'1h'})
@@ -181,7 +181,27 @@ const getProduct = async (productId) => {
     throw new Error('No Product Found');
   }
 };
+const getProductWithoutFormat = async (productId) => {
+  try {
+    const product = await prisma.products.findUnique({
+      where: {
+        ProductID: productId // Ensure this matches the correct field in your schema
+      }
+    });
 
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+
+    return {
+    product
+    };
+  } catch (error) {
+    console.error('Error retrieving product:', error.message);
+    throw new Error('No Product Found');
+  }
+};
 
 
 
@@ -197,6 +217,7 @@ const createCart = async (userId, productId, quantity, unitPrice)=>{
     })
     return newCartItem
   } catch (error) {
+    console.error(error)
     throw new Error('Error Adding to Cart!')
   }
 }
@@ -365,6 +386,7 @@ try {
     decreaseCartItems,
     createProduct,
     getProduct,
+    getProductWithoutFormat,
     createCart,
     prisma,
     createUser,
