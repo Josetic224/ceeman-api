@@ -3,29 +3,43 @@ const { uploadImageToCloudinary, createProduct, getUserById, getProduct } = requ
 const { formatServerError, unAuthorized, badRequest } = require("../helpers/error");
 const prisma = new PrismaClient
 
-
 const createProductController = async (req, res) => {
-  const userId = req.user.id
-    const { name, description, price, category } = req.body;
-  console.log(req.body);
-    
-    const { file } = req; // Access the uploaded file
-  
-    try {
+  const userId = req.user.id;
+  const { name, description, price, category } = req.body;
 
-      const imageUrl = await uploadImageToCloudinary(file);
-      console.log(imageUrl);
-      const newProduct = await createProduct(name, description, price, category, imageUrl);
-      console.log(newProduct);
-     
-  
-    
-      res.status(201).json(newProduct);
-    } catch (error) {
-      console.error("Error creating product:", error);
-      res.status(500).json({ error: "Failed to create product" });
+  try {
+    console.log('Uploaded files:', req.files); // Log uploaded files
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send('No files were uploaded.');
     }
-  };
+
+    // Check if each file has a path property
+    for (const file of req.files) {
+      if (!file.path) {
+        console.error('File path is undefined:', file);
+        return res.status(500).send('File path is undefined.');
+      }
+    }
+
+    // Upload files to Cloudinary
+    const imageUrls = await Promise.all(req.files.map(file => uploadImageToCloudinary(file.path)));
+
+    // Concatenate image URLs into a single string
+    const concatenatedImageUrls = imageUrls.join(',');
+
+    // Create product
+    const newProduct = await createProduct(name, description, price, category, concatenatedImageUrls);
+    console.log(newProduct);
+
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error("Error creating product:", error);
+    res.status(500).json({ error: "Failed to create product" });
+  }
+};
+
+
   
 
   const viewProducts = async (req, res) => {

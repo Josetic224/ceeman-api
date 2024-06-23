@@ -6,6 +6,7 @@ const session = require('express-session');
 const passport = require('passport');
 const { connectToDatabase, prisma } = require('../db/user.db.js');
 const googleRouter = require('../routers/api/router-google.js');
+require('../config/passport-google.js')
 
 // Load environment variables
 dotenv.config({ path: ".env" });

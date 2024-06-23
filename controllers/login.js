@@ -1,8 +1,7 @@
 const {getUserByEmail, comparePassword, loginUser } = require('../db/user.db');
-const { badRequest, formatServerError } = require('../helpers/error');
 const {LoginUserSchema} = require('../validations/user')
 
-exports.logIn = async(req, res) =>{
+const logIn = async(req, res) =>{
     const body = LoginUserSchema.safeParse(req.body)
     if(!body.success){
         return res.status(400).json({
@@ -18,7 +17,6 @@ exports.logIn = async(req, res) =>{
         return res.status(401)("This Email does exists")
     }
      const signUser= await loginUser(email,password)
-
      return res.status(200).json({
         message:"user signed in SuccessFully",
         token : signUser
@@ -32,3 +30,7 @@ exports.logIn = async(req, res) =>{
     }
 }
 
+
+module.exports ={
+    logIn
+}

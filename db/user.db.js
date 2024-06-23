@@ -106,17 +106,15 @@ const token = sign({id:user.UserID, role:user.role}, jwtSecret, {expiresIn:'7d'}
 
 // upload product to cloudinary
 
-const uploadImageToCloudinary = async (file) => {
-
+// Cloudinary upload function
+const uploadImageToCloudinary = async (filePath) => {
   try {
-    // Upload image to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(filePath, {
       folder: "products"
     });
-
     return result.secure_url;
   } catch (error) {
-    console.error(error)
+    console.error('Cloudinary upload error:', error);
     throw new Error("Failed to upload image to Cloudinary");
   }
 };
