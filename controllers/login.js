@@ -26,7 +26,9 @@ exports.logIn = async(req, res) =>{
 
     } catch (error) {
         console.log(error)
-        return formatServerError
+        return res.status(500).json({
+            message:error.message
+        })
     }
 }
 

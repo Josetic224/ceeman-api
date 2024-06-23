@@ -383,50 +383,88 @@ const getTotalAmountInCart = async (userId) => {
   }
 };
 
-const fetchStates = async () => {
+const saveLocation = async(userId,state, city, address, phone_Number) =>{
   try {
-    const response = await axios.get('https://api.facts.ng/v1/states');
-    return response.data;
+    const location = await prisma.location.create({
+      data: {
+        state:state,
+        city:city,
+        address:address,
+        phone_Number:phone_Number, // Assuming you have this in the request body as well
+        User:{
+          connect:{
+            UserID:userId
+          }
+        }
+      }
+    });
+
+   return location
   } catch (error) {
-    console.error('Error fetching states:', error);
-    throw new Error('Failed to fetch states');
+    console.error('Error saving location:', error);
+    throw new Error('Failed to save location');
   }
-};
+}
 
-const fetchStateDetails = async (stateId) => {
+const createAnOrder = async(userId, )=>{
   try {
-    const response = await axios.get(`https://api.facts.ng/v1/states`);
-    return response.data.lgas;
-  } catch (error) {
-    console.error(`Error fetching details for state ${stateId}:`, error);
-    throw new Error('Failed to fetch state details');
-  }
-};
+    //get cart items for the User
 
+    const cartItems = await prisma.cartItems.findMany({
+      where:{UserID:userId },
+      include:{Products:true}
 
-const getStatesWithCities = async () => {
-  try {
-    const states = await fetchStates();
-    const statesWithCities = [];
-
-    for (const state of states) {
-      const cities = await fetchStateDetails(state.id);
-      statesWithCities.push({
-        state: state.name,
-        id: state.id,
-        cities
-      });
+    })
+    if (cartItems.length === 0){
+      throw new Error("NO ITEMS FOUND IN CART")
     }
 
-    return statesWithCities;
+    const total = cartItems.reduce((sum, item)=>sum + (item.quantity * item.Products.price), 0)
+    const formattedTotal = `₦${total.toFixed(2)}`;
+    //create an order
+    const order = await prisma.orders.create({
+      data:{
+        UserID:userId,
+        orderDate:Date(),
+        total:total,
+        status:"pending",
+        orderItems:{
+         create:cartItems.map(item =>({
+          ProductID:item.ProductID,
+          quantity:item.quantity,
+          unitPrice:item.Products.price
+         }))
+        }
+      }
+    })
+    // Clear cart items
+    await prisma.cartItems.deleteMany({
+      where: { UserID: userId },
+    });
+
+    //Format order items with Naira symbol
+    const formattedOrderItems = order.orderItems.map(item => ({
+      ...item,
+      formattedUnitPrice: `₦${item.unitPrice.toFixed(2)}`,
+    }));
+
+    return ({
+      ...order,
+      formattedTotal,
+      orderItems:formattedOrderItems
+    })
   } catch (error) {
-    console.error('Error combining states and cities:', error);
-    throw new Error('Failed to combine states and cities');
+    console.error(error)
+    throw new Error("Order could not be created")
   }
-};
+
+}
+
+
 
    module.exports = {
-    getStatesWithCities,
+    createAnOrder,
+    saveLocation,
     getTotalCartItems,
     viewCartItems,
     uploadImageToCloudinary,
@@ -443,5 +481,5 @@ const getStatesWithCities = async () => {
     getUserByEmail,
     getUserById,
     deleteItemsInCart,
-    getTotalAmountInCart
+    getTotalAmountInCart,
    }
