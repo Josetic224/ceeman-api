@@ -132,7 +132,7 @@ const uploadImageToCloudinary = async (filePath) => {
       data: {
         name,
         description,
-        imageUrl,
+        imageUrl:[imageUrl],
         price: parseFloat(numericPrice.toFixed(2)), // Store price as float with 2 decimal places
         category,
       },
