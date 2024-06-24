@@ -404,64 +404,63 @@ const saveLocation = async(userId,state, city, address, phone_Number) =>{
   }
 }
 
-const createAnOrder = async(userId, )=>{
-  try {
-    //get cart items for the User
+// const createAnOrder = async(userId, )=>{
+//   try {
+//     //get cart items for the User
 
-    const cartItems = await prisma.cartItems.findMany({
-      where:{UserID:userId },
-      include:{Products:true}
+//     const cartItems = await prisma.cartItems.findMany({
+//       where:{UserID:userId },
+//       include:{Products:true}
 
-    })
-    if (cartItems.length === 0){
-      throw new Error("NO ITEMS FOUND IN CART")
-    }
+//     })
+//     if (cartItems.length === 0){
+//       throw new Error("NO ITEMS FOUND IN CART")
+//     }
 
-    const total = cartItems.reduce((sum, item)=>sum + (item.quantity * item.Products.price), 0)
-    const formattedTotal = `₦${total.toFixed(2)}`;
-    //create an order
-    const order = await prisma.orders.create({
-      data:{
-        UserID:userId,
-        orderDate:Date(),
-        total:total,
-        status:"pending",
-        orderItems:{
-         create:cartItems.map(item =>({
-          ProductID:item.ProductID,
-          quantity:item.quantity,
-          unitPrice:item.Products.price
-         }))
-        }
-      }
-    })
-    // Clear cart items
-    await prisma.cartItems.deleteMany({
-      where: { UserID: userId },
-    });
+//     const total = cartItems.reduce((sum, item)=>sum + (item.quantity * item.Products.price), 0)
+//     const formattedTotal = `₦${total.toFixed(2)}`;
+//     //create an order
+//     const order = await prisma.orders.create({
+//       data:{
+//         UserID:userId,
+//         orderDate:Date(),
+//         total:total,
+//         status:"pending",
+//         orderItems:{
+//          create:cartItems.map(item =>({
+//           ProductID:item.ProductID,
+//           quantity:item.quantity,
+//           unitPrice:item.Products.price
+//          }))
+//         }
+//       }
+//     })
+//     // Clear cart items
+//     await prisma.cartItems.deleteMany({
+//       where: { UserID: userId },
+//     });
 
-    //Format order items with Naira symbol
-    const formattedOrderItems = order.orderItems.map(item => ({
-      ...item,
-      formattedUnitPrice: `₦${item.unitPrice.toFixed(2)}`,
-    }));
+//     //Format order items with Naira symbol
+//     const formattedOrderItems = order.orderItems.map(item => ({
+//       ...item,
+//       formattedUnitPrice: `₦${item.unitPrice.toFixed(2)}`,
+//     }));
 
-    return ({
-      ...order,
-      formattedTotal,
-      orderItems:formattedOrderItems
-    })
-  } catch (error) {
-    console.error(error)
-    throw new Error("Order could not be created")
-  }
+//     return ({
+//       ...order,
+//       formattedTotal,
+//       orderItems:formattedOrderItems
+//     })
+//   } catch (error) {
+//     console.error(error)
+//     throw new Error("Order could not be created")
+//   }
 
-}
+// }
 
 
 
    module.exports = {
-    createAnOrder,
     saveLocation,
     getTotalCartItems,
     viewCartItems,

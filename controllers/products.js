@@ -43,6 +43,7 @@ const createProductController = async (req, res) => {
   
 
   const viewProducts = async (req, res) => {
+    const userId = req.user.id
     try {
       const products = await prisma.products.findMany();
   
@@ -72,7 +73,7 @@ const createProductController = async (req, res) => {
       return res.status(200).json(formattedProducts);
     } catch (error) {
       console.error('Error retrieving products:', error.message);
-      return res.status(500).json({ message: "Server error" });
+      return res.status(500).json({ message: "Server error", error});
     }
   };
 

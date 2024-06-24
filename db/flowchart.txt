@@ -1,0 +1,26 @@
+graph TD;
+    A[Order Creation] --> B[Initialize Payment]
+    B --> C[Redirect User to Flutterwave for Payment]
+    C --> D[User Completes Payment on Flutterwave]
+    D --> E[Flutterwave Redirects Back with Transaction ID]
+    E --> F[Payment Verification]
+    F --> G[Handle Webhook for Payment Status]
+
+    subgraph Server
+        A
+        B
+        F
+        G
+    end
+
+    subgraph User
+        C
+        D
+        E
+    end
+
+    subgraph Flutterwave
+        D
+        E
+        G
+    end
