@@ -52,7 +52,6 @@ app.get("/", (req, res) => {
 
 require("../routers/indexroutes.js")(app);
 app.use(googleRouter);
-
 // Start the application
 async function startApp() {
   try {

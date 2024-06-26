@@ -40,7 +40,7 @@ model Products {
   description String
   price Float
   category String @default("generators")
-  imageUrl String[]
+  imageUrl String
   orderItems OrderItems[]
   Reviews Reviews[]
   cartItems CartItems[]

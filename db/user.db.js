@@ -78,7 +78,7 @@ const getUserByEmail =  async (email) =>
           email,
           password: hashedPassword, // Store hashed password in the database
           role:"user",
-          googleId:null
+          googleId:''
         }
       });
   
@@ -132,7 +132,7 @@ const uploadImageToCloudinary = async (filePath) => {
       data: {
         name,
         description,
-        imageUrl:[imageUrl],
+        imageUrl:imageUrl,
         price: parseFloat(numericPrice.toFixed(2)), // Store price as float with 2 decimal places
         category,
       },
@@ -178,22 +178,20 @@ const getProduct = async (productId) => {
     throw new Error('No Product Found');
   }
 };
+
 const getProductWithoutFormat = async (productId) => {
   try {
     const product = await prisma.products.findUnique({
       where: {
-        ProductID: productId // Ensure this matches the correct field in your schema
-      }
+        ProductID: productId,
+      },
     });
 
     if (!product) {
       throw new Error('Product not found');
     }
 
-
-    return {
-    product
-    };
+    return product;
   } catch (error) {
     console.error('Error retrieving product:', error.message);
     throw new Error('No Product Found');
@@ -202,22 +200,58 @@ const getProductWithoutFormat = async (productId) => {
 
 
 
-const createCart = async (userId, productId, quantity, unitPrice)=>{
-  try {
-    const newCartItem = await prisma.cartItems.create({
-      data:{
-        UserID:userId,
-        ProductID:productId,
-        quantity:quantity,
-        unitPrice:unitPrice
+
+const standardizeImageUrl = (product) => {
+  if (typeof product.imageUrl === 'string') {
+    try {
+      const parsed = JSON.parse(product.imageUrl);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        product.imageUrl = parsed[0];  // Use the first URL in the array
       }
-    })
-    return newCartItem
-  } catch (error) {
-    console.error(error)
-    throw new Error('Error Adding to Cart!')
+    } catch (e) {
+      // If JSON.parse fails, leave product.imageUrl as is (it's a valid string)
+    }
+  } else if (Array.isArray(product.imageUrl) && product.imageUrl.length > 0) {
+    product.imageUrl = product.imageUrl[0];  // Use the first URL in the array
   }
-}
+  return product;
+};
+
+
+
+const createCart = async (userId, productId, quantity, unitPrice) => {
+  try {
+    const product = await prisma.products.findUnique({
+      where: {
+        ProductID: productId,
+      },
+    });
+
+    // Standardize the imageUrl
+    const standardizedProduct = standardizeImageUrl(product);
+
+    const newCartItem = await prisma.cartItems.create({
+      data: {
+        UserID: userId,
+        ProductID: productId,
+        quantity: quantity,
+        unitPrice: unitPrice,
+        
+        // Assuming there's a Products relation, adjust as needed
+        Products: {
+          connect: { ProductID: productId },
+        },
+      },
+    });
+
+    return newCartItem;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Error Adding to Cart!');
+  }
+};
+
+
 
 const viewCartItems = async(userId)=>{
   const cartItems = await prisma.cartItems.findMany({

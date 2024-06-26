@@ -7,21 +7,16 @@ const newCart = async (req, res)=>{
   const productId = req.params.id
   const quantity = req.body.quantity || 1
   try {
-    const getProductById = await getProductWithoutFormat(productId)
-    
-    const freshCart = await createCart(userId, getProductById.product.ProductID, quantity, getProductById.product.price) 
+    const freshCart = await createCart(userId, productId,quantity, ) 
 
     return res.status(200).json({
       message:"Product successfully Added to cart",
       freshCart
     })
-    
   } catch (error) {
     console.log(error)
-    return badRequest(res, "Product already added to cart")
+    return res.status(500).json("server error")
   }
-
-
 }
 const increase_Item_Quantity = async (req, res) => {
   const userId = req.user.id;
