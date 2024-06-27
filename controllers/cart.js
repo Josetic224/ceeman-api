@@ -91,22 +91,17 @@ const viewCart = async (req, res) => {
       return res.status(400).json({ error: 'No products in cart found' });
     }
 
-  
-    // Calculate the total price for each cart item and the total for the entire cart
-    let cartTotal = 0;
-    const formattedView = view.map(item => {
-      const totalPrice = item.unitPrice * item.quantity;
-      cartTotal += totalPrice;
-      return {
-        ...item,
-        totalPrice: `₦${totalPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`,
-        unitPrice: `₦${item.unitPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
-      };
-    });
+    // Format the prices to include the Naira symbol
+    const formattedView = view.map(item => ({
+      ...item,
+      unitPrice: `₦${item.unitPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
+    }));
+
     res.status(200).json({
-      cartItems: formattedView,
-      cartTotal: `₦${cartTotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
+      message:"Successfully Fetched Cart items",
+      cartItems: formattedView
     });
+    return;
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error' });

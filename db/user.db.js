@@ -67,22 +67,27 @@ getUserByGoogleId = async(googleId)=>{
 const getUserByEmail =  async (email) =>
   await prisma.user.findUnique({ where: { email:email} });
 
-  const createUser = async (fullName, email, password) => {
+
+  const createUser = async (fullName, email, password, googleId= null) => {
     try {
-      const hashedPassword = await hashSync(password, 10); // Hash the password securely
+      const hashedPassword = hashSync(password, 10); // Hash the password securely
+  
+      // Prepare the data object
+      const userData = {
+        fullName,
+        email,
+        password: hashedPassword, // Store hashed password in the database
+        role: "user",
+        googleId: googleId, // Ensure googleId is null if not provided
+      };
+      console.log(userData)
   
       // Create new user in the database
       const newUser = await prisma.user.create({
-        data: {
-          fullName,
-          email,
-          password: hashedPassword, // Store hashed password in the database
-          role:"user",
-          googleId:''
-        }
+        data: userData,
       });
   
-      return { newUser }; // Return both newUser object and token
+      return newUser; // Return the newUser object
     } catch (error) {
       console.error('Error creating user:', error);
       throw new Error('Failed to create user.');
@@ -90,6 +95,8 @@ const getUserByEmail =  async (email) =>
       await prisma.$disconnect(); // Disconnect from the database after operation
     }
   };
+  
+  
 
   const loginUser = async (email, password) => {
 

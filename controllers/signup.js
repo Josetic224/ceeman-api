@@ -10,13 +10,13 @@ if (!body.success) {
     });
   }
 
-  const {fullName, email, password} = body.data;
+  const {fullName, email, password, googleId} = body.data;
     try {
         let checkUser = await getUserByEmail(email)
         if(checkUser){
             return badRequest(res, "email already in use")
         }
-     const newUser = await createUser(fullName, email, password);
+     const newUser = await createUser(fullName, email, password, googleId);
 
 
 return res.status(200).json({

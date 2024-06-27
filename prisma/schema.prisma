@@ -12,7 +12,7 @@ model User {
   fullName String
   email    String  @unique
   password String?
-  googleId  String? @unique
+  googleId  String?
   Session  Session[]
   Orders Orders[]
   Reviews Reviews[]
