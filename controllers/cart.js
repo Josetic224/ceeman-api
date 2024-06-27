@@ -5,9 +5,11 @@ const { formatServerError, badRequest } = require("../helpers/error");
 const newCart = async (req, res)=>{
   const userId = req.user.id
   const productId = req.params.id
-  const quantity = req.body.quantity || 1
+  const quantity = 1
   try {
-    const freshCart = await createCart(userId, productId,quantity, ) 
+    const getProductById = await getProduct(productId);
+
+    const freshCart = await createCart(userId, getProductById.ProductID,quantity, getProductById.price ) 
 
     return res.status(200).json({
       message:"Product successfully Added to cart",
@@ -89,17 +91,22 @@ const viewCart = async (req, res) => {
       return res.status(400).json({ error: 'No products in cart found' });
     }
 
-    // Format the prices to include the Naira symbol
-    const formattedView = view.map(item => ({
-      ...item,
-      unitPrice: `₦${item.unitPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
-    }));
-
-    res.status(200).json({
-      message:"Successfully Fetched Cart items",
-      cartItems: formattedView
+  
+    // Calculate the total price for each cart item and the total for the entire cart
+    let cartTotal = 0;
+    const formattedView = view.map(item => {
+      const totalPrice = item.unitPrice * item.quantity;
+      cartTotal += totalPrice;
+      return {
+        ...item,
+        totalPrice: `₦${totalPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`,
+        unitPrice: `₦${item.unitPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
+      };
     });
-    return;
+    res.status(200).json({
+      cartItems: formattedView,
+      cartTotal: `₦${cartTotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error' });

@@ -217,39 +217,31 @@ const standardizeImageUrl = (product) => {
   return product;
 };
 
+const parsePrice = (priceString) => {
+  // Remove currency symbol and commas, then convert to float
+  return parseFloat(priceString.replace(/[^0-9.-]+/g, ""));
+};
 
 
 const createCart = async (userId, productId, quantity, unitPrice) => {
   try {
-    const product = await prisma.products.findUnique({
-      where: {
-        ProductID: productId,
-      },
-    });
-
-    // Standardize the imageUrl
-    const standardizedProduct = standardizeImageUrl(product);
-
+    const parsedUnitPrice = parsePrice(unitPrice);
     const newCartItem = await prisma.cartItems.create({
       data: {
         UserID: userId,
         ProductID: productId,
         quantity: quantity,
-        unitPrice: unitPrice,
-        
-        // Assuming there's a Products relation, adjust as needed
-        Products: {
-          connect: { ProductID: productId },
-        },
-      },
+        unitPrice: parsedUnitPrice
+      }
     });
-
     return newCartItem;
   } catch (error) {
-    console.error(error);
     throw new Error('Error Adding to Cart!');
   }
 };
+
+
+
 
 
 
