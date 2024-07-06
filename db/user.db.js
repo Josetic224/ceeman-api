@@ -49,6 +49,10 @@ const getUserById = async (userId) =>{
        const user = prisma.user.findUnique({
         where:{UserID : userId}
        }) 
+
+       if(!user){
+        throw new Error("User not Found!")
+       }
     } catch (error) {
         throw new Error("Failed to Fetch User by Id")
     }
@@ -74,6 +78,7 @@ const getUserByEmail =  async (email) =>
   
       // Prepare the data object
       const userData = {
+        
         fullName,
         email,
         password: hashedPassword, // Store hashed password in the database
@@ -125,32 +130,30 @@ const uploadImageToCloudinary = async (filePath) => {
     throw new Error("Failed to upload image to Cloudinary");
   }
 };
- // create a Product
 
-
- const createProduct = async (name, description, price, category, imageUrl) => {
+//create a Product
+const createProduct = async (name, description, price, imageUrls) => {
   try {
     // Remove commas and currency symbol, if any, and convert to float
     const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
-
 
     // Save the product to MongoDB using Prisma
     const newProduct = await prisma.products.create({
       data: {
         name,
         description,
-        imageUrl:imageUrl,
+        imageUrl: imageUrls, // Ensure this is an array of strings
         price: parseFloat(numericPrice.toFixed(2)), // Store price as float with 2 decimal places
-        category,
       },
     });
 
     return newProduct;
   } catch (error) {
-    console.error('Error creating product:', error);
+    console.error('Error creating product:', error.message);
     throw error;
   }
 };
+
 
 // // Example usage
 // createProduct('Product Name', 'Product Description', '₦1,200.50', 'Electronics', 'example.jpg')
@@ -169,6 +172,7 @@ const getProduct = async (productId) => {
       }
     });
 
+   
     if (!product) {
       throw new Error('Product not found');
     }
@@ -254,11 +258,16 @@ const createCart = async (userId, productId, quantity, unitPrice) => {
 
 const viewCartItems = async(userId)=>{
   const cartItems = await prisma.cartItems.findMany({
-    where:{UserID:userId},
-    include:{Products:true}
+    where:{
+      UserID:userId
+    }
   })
+
   return cartItems
+
 }
+
+
 
 const increaseCartItems = async (userId, cartItemId, amount) => {
   try {
@@ -278,7 +287,7 @@ const increaseCartItems = async (userId, cartItemId, amount) => {
       where: { CartItemID: cartItem.CartItemID },
       data: {
         quantity: cartItem.quantity + amount,
-        unitPrice: cartItem.Products.price * (cartItem.quantity + amount), // Adjust unit price based on new quantity
+        unitPrice: cartItem.unitPrice // Adjust unit price based on new quantity
       },
     });
 
@@ -326,7 +335,7 @@ const decreaseCartItems = async (userId, cartItemId, amount) => {
         },
         data: {
           quantity: newQuantity,
-          unitPrice: product.price * newQuantity, // Adjust unit price based on new quantity
+          unitPrice: cartItem.unitPrice, // Adjust unit price based on new quantity
         },
       });
     } else {
@@ -380,6 +389,7 @@ const getTotalCartItems = async (userId) => {
   try {
     const totalItems = await prisma.cartItems.count({
       where: { UserID: userId }
+      
     });
 
     return totalItems;
@@ -389,22 +399,19 @@ const getTotalCartItems = async (userId) => {
   }
 };
 
-const getTotalAmountInCart = async (userId) => {
+const getTotalAmountInCart = async () => {
   try {
     // Find all cart items for the user
-    const cartItems = await prisma.cartItems.findMany({
-      where: { UserID: userId },
-      include: { Products: true }, // Include Products to access price
-    });
+    const cartItems = await prisma.cartItems.findMany();
 
     if (!cartItems || cartItems.length === 0) {
       return 0; // If no items in cart, return 0
     }
 
     // Calculate total amount
-    let totalAmount = 0;
+ let totalAmount;
     cartItems.forEach((cartItem) => {
-      totalAmount += cartItem.quantity * cartItem.Products.price;
+      totalAmount = cartItem.quantity + cartItem.unitPrice;
     });
 
     return totalAmount;

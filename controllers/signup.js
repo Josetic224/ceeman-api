@@ -1,5 +1,8 @@
 const { getUserByEmail, createUser } = require('../db/user.db');
 const { badRequest, formatServerError } = require('../helpers/error');
+const sendEmail = require('../utils/nodemailer');
+const generateDynamicEmail = require('../utils/welcome');
+
 const {userSchema} = require('../validations/user')
 
 exports.signUp = async (req, res)=>{
@@ -17,8 +20,14 @@ if (!body.success) {
             return badRequest(res, "email already in use")
         }
      const newUser = await createUser(fullName, email, password, googleId);
+generateDynamicEmail(fullName)
 
-
+ await sendEmail({
+    email:email,
+    html: generateDynamicEmail(fullName),
+    subject:"THANKS FOR SIGNING UP"
+ })
+ 
 return res.status(200).json({
     message:"User Signed UP successfully",
     newUser

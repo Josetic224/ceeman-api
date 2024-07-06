@@ -1,4 +1,4 @@
-const { increaseCartItems, decreaseCartItems, createCart, getProduct, viewCartItems,getProductWithoutFormat, deleteItemsInCart, getTotalAmountInCart, getTotalCartItems } = require("../db/user.db");
+const { increaseCartItems, decreaseCartItems, createCart, getProduct, viewCartItems,getProductWithoutFormat, deleteItemsInCart, getTotalAmountInCart, getTotalCartItems, getUserById } = require("../db/user.db");
 const { formatServerError, badRequest } = require("../helpers/error");
 
 //logic to add a product to the cart
@@ -7,6 +7,7 @@ const newCart = async (req, res)=>{
   const productId = req.params.id
   const quantity = 1
   try {
+    const getUser = await getUserById(userId)
     const getProductById = await getProduct(productId);
 
     const freshCart = await createCart(userId, getProductById.ProductID,quantity, getProductById.price ) 
@@ -82,7 +83,6 @@ const decrease_item_quantity = async (req, res) => {
 };
 
 
-
 const viewCart = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -94,12 +94,17 @@ const viewCart = async (req, res) => {
     // Format the prices to include the Naira symbol
     const formattedView = view.map(item => ({
       ...item,
-      unitPrice: `₦${item.unitPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
+      unitPrice: `₦${(item.unitPrice).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
     }));
 
+    // Calculate the total amount
+    const totalAmount = view.reduce((total, item) => total + (item.unitPrice * item.quantity), 0);
+    const formattedTotalAmount = `₦${totalAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+
     res.status(200).json({
-      message:"Successfully Fetched Cart items",
-      cartItems: formattedView
+      message: "Successfully Fetched Cart items",
+      cartItems: formattedView,
+      totalAmount: formattedTotalAmount
     });
     return;
   } catch (error) {
@@ -107,6 +112,7 @@ const viewCart = async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 const totalNumberOfCartItems = async (req, res) => {
   const userId = req.user.id;
@@ -126,7 +132,7 @@ const get_total_amount_in_cart = async (req, res) => {
   const userId = req.user.id; // Assuming userId is retrieved from authenticated user
 
   try {
-    const totalAmount = await getTotalAmountInCart(userId);
+    const totalAmount = await getTotalAmountInCart();
 
     // Format totalAmount with Naira symbol
     const formattedTotalAmount = `₦${totalAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;

@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Express session setup
 app.use(session({
-  secret: "ggrhrururnrn",
+  secret: process.env.session_Secret,
   resave: false,
   saveUninitialized: false,
 }));

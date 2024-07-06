@@ -1,143 +1,122 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const axios = require('axios');
+const {PrismaClient} = require('@prisma/client')
+
+const prisma = new PrismaClient()
+
 const dotenv = require('dotenv')
-dotenv.config({ path: ".env" });
-const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY;
-// const createOrder = async (req, res) => {
-//   const userId = req.user.id;
+dotenv.config({path: ".env"})
 
-//   try {
-//     // Get cart items for the user
-//     const cartItems = await prisma.cartItems.findMany({
-//       where: { UserID: userId },
-//       include: { Products: true },
-//     });
 
-//     if (cartItems.length === 0) {
-//       return res.status(400).json({ error: 'No items in cart' });
-//     }
+exports.createOrder = async(req, res)=>{
+  const userId = req.user.id
+  try {
 
-//     // Calculate total order amount
-//     const total = cartItems.reduce((sum, item) => sum + (item.quantity * item.Products.price), 0);
+    const {default: got} = await import("got")
 
-//     // Format total with Naira symbol
-//     const formattedTotal = `₦${total.toFixed(2)}`;
+    // Fetch user details
+    const user = await prisma.user.findUnique({
+      where: { UserID: userId },
+      include: { location: true } // Include location to get the phone number
+    });
 
-//     // Create an order
-//     const order = await prisma.orders.create({
-//       data: {
-//         UserID: userId,
-//         orderDate: new Date(),
-//         total: total, // Store the numeric value in the database
-//         status: 'pending',
-//         orderItems: {
-//           create: cartItems.map(item => ({
-//             ProductID: item.ProductID,
-//             quantity: item.quantity,
-//             unitPrice: item.Products.price,
-//           })),
-//         },
-//       },
-//     });
-
-//     // Clear cart items
-//     await prisma.cartItems.deleteMany({
-//       where: { UserID: userId },
-//     });
-
-//     // Format order items with Naira symbol
-//     const formattedOrderItems = order.orderItems.map(item => ({
-//       ...item,
-//       formattedUnitPrice: `₦${item.unitPrice.toFixed(2)}`,
-//     }));
-
-//     res.status(201).json({
-//       message: 'Order created successfully',
-//       order: {
-//         ...order,
-//         formattedTotal, // Add the formatted total to the response
-//         orderItems: formattedOrderItems, // Add the formatted order items to the response
-//       },
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
-const createOrder = async (req, res) => {
-    const userId = req.user.id;
-  
-    try {
-      // Get cart items for the user
-      const cartItems = await prisma.cartItems.findMany({
-        where: { UserID: userId },
-        include: { Products: true },
-      });
-  
-      if (cartItems.length === 0) {
-        return res.status(400).json({ error: 'No items in cart' });
-      }
-  
-      // Calculate total order amount
-      const total = cartItems.reduce((sum, item) => sum + (item.quantity * item.Products.price), 0);
-  
-      // Create an order
-      const order = await prisma.orders.create({
-        data: {
-          UserID: userId,
-          orderDate: new Date(),
-          total: total, // Store the numeric value in the database
-          status: 'pending',
-          orderItems: {
-            create: cartItems.map(item => ({
-              ProductID: item.ProductID,
-              quantity: item.quantity,
-              unitPrice: item.Products.price,
-            })),
-          },
-        },
-      });
-  
-      // Clear cart items
-      await prisma.cartItems.deleteMany({
-        where: { UserID: userId },
-      });
-  
-      // Initialize payment with Flutterwave
-      const paymentResponse = await axios.post(
-        'https://api.flutterwave.com/v3/payments',
-        {
-          tx_ref: order.OrderID,
-          amount: total,
-          currency: 'NGN',
-          redirect_url: 'http://localhost:3000/api/payment/callback',
-          customer: {
-            email: req.user.email, // Assuming you have user's email in the user object
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${FLW_SECRET_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      // Send the payment initialization response back to the client
-      res.status(201).json({
-        message: 'Order created successfully',
-        order,
-        payment: paymentResponse.data,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Server error' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
     }
-  };
-  
-  module.exports = {
-    createOrder,
-  };
 
+    // Fetch cart items for the user
+    const cartItems = await prisma.cartItems.findMany({
+      where: { UserID: userId },
+      include: { Products: true }
+    });
+
+    if (cartItems.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty.' });
+    }
+
+    // Calculate total amount
+    const totalAmount = cartItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+
+    // Create the order
+    const order = await prisma.orders.create({
+      data: {
+        UserID: userId,
+        orderDate: new Date(),
+        total: BigInt(totalAmount),
+        status: 'pending',
+        orderItems: {
+          create: cartItems.map(item => ({
+            ProductID: item.ProductID,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice
+          }))
+        }
+      }
+    });
+
+    // Prepare payment data
+    const paymentData = {
+      tx_ref: `order-${order.OrderID}`,
+      amount: totalAmount.toString(),
+      currency: "NGN",
+      redirect_url: "https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+      meta: {
+        consumer_id: user.UserID,
+        order_id: order.OrderID
+      },
+      customer: {
+        email: user.email,
+        phonenumber: user.location[0]?.phone_Number, // Assuming the user has at least one location
+        name: user.fullName
+      },
+      customizations: {
+        title: "Royal-Ceeman Generators",
+        logo: "https://res.cloudinary.com/doo97eq6b/image/upload/v1720138901/products/gcwykomlc3pmncnbtd6m.jpg"
+      }
+    };
+
+    // Call Flutterwave API to initiate payment
+    const response = await got.post("https://api.flutterwave.com/v3/payments", {
+      headers: {
+        Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`
+      },
+      json: paymentData
+    }).json();
+
+    // Clear the user's cart after order creation
+    await prisma.cartItems.deleteMany({
+      where: { UserID: userId }
+    });
+
+    // Return the response from Flutterwave API
+    res.status(201).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while creating the order.' });
+  }
+}
+
+exports.confirmOrder = async(req, res)=>{
+  const payload = req.body
+  const signature = req.headers['verif-hash']
+
+  try {
+    if(!signature || signature !== process.env.FLW_WEBHOOK_SECRET ){
+      res.status(401).send('unAthorized');  
+    }
+    if (payload.event === 'charge.completed' && payload.data.status === 'successful') {
+      const transactionId = payload.data.tx_ref;
+  
+      await prisma.orders.update({
+        where: { OrderID: transactionId.split('-')[1] },
+        data: { status: 'completed' }
+      });
+  
+      res.status(200).send('Webhook received successfully');
+  } else {
+    res.status(400).send('Event not handled');
+  }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("server error")
+  }
+  
+}
