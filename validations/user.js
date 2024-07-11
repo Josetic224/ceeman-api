@@ -37,7 +37,19 @@ const LoginUserSchema = z.object({
 .strict();
 
 
+const contactUserSchema = z.object({
+  name:z.string({
+    required_error: "Name is required"
+  }),
+  email: z.string({
+    required_error: "Email is required",
+  }).email("invalid email"),
+  request: z.string({
+    required_error:"PLease Add a request!"
+  })
+})
 module.exports = {
     userSchema,
-    LoginUserSchema
+    LoginUserSchema,
+    contactUserSchema
 }

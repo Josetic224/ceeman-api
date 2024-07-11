@@ -14,7 +14,7 @@ dotenv.config({ path: ".env" });
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    if (origin === "http://localhost:3000" || !origin) {
+    if (origin === "http://localhost:5173" || !origin) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));

@@ -123,9 +123,9 @@ model Agent{
 }
 model Contact {
    contactID String @id @default(cuid()) @map("_id")
+   name String
    email String 
    request String
-
 }
 
 model location {

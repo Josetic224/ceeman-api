@@ -151,7 +151,10 @@ const delete_cart_item = async (req, res) => {
 
   try {
     const result = await deleteItemsInCart(userId, cartItemId);
-    res.status(200).json(result); // Send success message or error message if any
+    res.status(200).json({
+      message:"item deleted successfully",
+      result
+    }); // Send success message or error message if any
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
