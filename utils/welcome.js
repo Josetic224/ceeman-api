@@ -103,3 +103,5 @@ const generateDynamicEmail = (name)=>{
         
 `
 }
+
+module.exports = generateDynamicEmail

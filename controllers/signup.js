@@ -20,7 +20,6 @@ if (!body.success) {
             return badRequest(res, "email already in use")
         }
      const newUser = await createUser(fullName, email, password, googleId);
-generateDynamicEmail(fullName)
 
  await sendEmail({
     email:email,
@@ -34,6 +33,7 @@ return res.status(200).json({
 })
        
     } catch (error) {
-        return formatServerError
+        console.error(error)
+        return res.status(500).json("server error")
     }
 }
