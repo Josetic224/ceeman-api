@@ -234,20 +234,39 @@ const parsePrice = (priceString) => {
 };
 
 
-const createCart = async (userId, productId, quantity, unitPrice) => {
+const createOrUpdateCart = async (userIdOrSessionId, productId, quantity, unitPrice) => {
   try {
     const parsedUnitPrice = parsePrice(unitPrice);
-    const newCartItem = await prisma.cartItems.create({
-      data: {
-        UserID: userId,
-        ProductID: productId,
-        quantity: quantity,
-        unitPrice: parsedUnitPrice
+
+    const existingCartItem = await prisma.cartItems.findUnique({
+      where: {
+        UserID_ProductID: { UserID: userIdOrSessionId, ProductID: productId },
       }
     });
-    return newCartItem;
+
+    if (existingCartItem) {
+      const updatedCartItem = await prisma.cartItems.update({
+        where: {
+          UserID_ProductID: { UserID: userIdOrSessionId, ProductID: productId },
+        },
+        data: {
+          quantity: { increment: quantity }
+        }
+      });
+      return updatedCartItem;
+    } else {
+      const newCartItem = await prisma.cartItems.create({
+        data: {
+          UserID: userIdOrSessionId,
+          ProductID: productId,
+          quantity: quantity,
+          unitPrice: parsedUnitPrice
+        }
+      });
+      return newCartItem;
+    }
   } catch (error) {
-    throw new Error('Error Adding to Cart!');
+    throw new Error('Error adding to cart!');
   }
 };
 
@@ -256,16 +275,19 @@ const createCart = async (userId, productId, quantity, unitPrice) => {
 
 
 
-const viewCartItems = async(userId)=>{
+
+const viewCartItems = async (userIdOrSessionId) => {
   const cartItems = await prisma.cartItems.findMany({
-    where:{
-      UserID:userId
+    where: {
+      UserID: userIdOrSessionId
+    },
+    include: {
+      Products: true
     }
-  })
+  });
 
-  return cartItems
-
-}
+  return cartItems;
+};
 
 
 
@@ -300,8 +322,7 @@ const increaseCartItems = async (userId, cartItemId, amount) => {
 };
 
 
-
-const decreaseCartItems = async (userId, cartItemId, amount) => {
+const decreaseCartItems = async (userIdOrSessionId, cartItemId, amount) => {
   try {
     // Find the cart item by cartItemId
     let cartItem = await prisma.cartItems.findUnique({
@@ -309,8 +330,8 @@ const decreaseCartItems = async (userId, cartItemId, amount) => {
       include: { Products: true }
     });
 
-    if (!cartItem || cartItem.UserID !== userId) {
-      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
+    if (!cartItem || cartItem.UserID !== userIdOrSessionId) {
+      console.error(`Cart item with ID ${cartItemId} not found for user or session ${userIdOrSessionId}`);
       throw new Error('Cart item not found');
     }
 
@@ -354,7 +375,6 @@ const decreaseCartItems = async (userId, cartItemId, amount) => {
     throw new Error('Internal server error');
   }
 };
-
 
 const deleteItemsInCart = async (userId, cartItemId) => {
   try {
@@ -474,7 +494,7 @@ const createContact = async (name, email, request)=>{
     createProduct,
     getProduct,
     getProductWithoutFormat,
-    createCart,
+    createOrUpdateCart,
     prisma,
     createUser,
     getUserByEmail,

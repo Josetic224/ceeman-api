@@ -6,7 +6,9 @@ const session = require('express-session');
 const passport = require('passport');
 const { connectToDatabase, prisma } = require('../db/user.db.js');
 const googleRouter = require('../routers/api/router-google.js');
-require('../config/passport-google.js')
+require('../config/passport-google.js');
+const cookieParser = require('cookie-parser');
+const { v4: uuidv4 } = require('uuid');
 
 // Load environment variables
 dotenv.config({ path: ".env" });
@@ -34,12 +36,24 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Cookie parser middleware
+app.use(cookieParser());
+
 // Express session setup
 app.use(session({
   secret: process.env.session_Secret,
   resave: false,
   saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
+
+app.use((req, res, next) => {
+  if (!req.cookies.sessionId) {
+    const sessionId = uuidv4();
+    res.cookie('sessionId', sessionId, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  }
+  next();
+});
 
 // Passport initialization
 app.use(passport.initialize());
@@ -52,6 +66,7 @@ app.get("/", (req, res) => {
 
 require("../routers/indexroutes.js")(app);
 app.use(googleRouter);
+
 // Start the application
 async function startApp() {
   try {

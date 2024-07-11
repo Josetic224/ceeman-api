@@ -18,21 +18,16 @@ model User {
   Reviews Reviews[]
   cartItems CartItems[]
   location location[]
-   role    String   @default("user") // Role can be "user" or "admin"
+  role    String   @default("user") // Role can be "user" or "admin"
 }
 
 model Session {
   id       String   @id @default(cuid()) @map("_id")
   userId   String
   User     User  @relation(fields: [userId], references: [UserID])
-  data     String
+  token     String
   expires  DateTime
 }
-
-// enum Category {
-//   generators
-//   solar
-// }
 
 model Products {
   ProductID String @id @default(cuid()) @map("_id")
@@ -68,18 +63,19 @@ model CartItems {
   UserID String
   User User @relation(fields: [UserID], references: [UserID])
   ProductID String
+  SessionId String
   Products Products @relation(fields: [ProductID], references: [ProductID])
   quantity Int @default(1)
   unitPrice Float
-  @@unique([UserID,ProductID])
+  @@unique([UserID, ProductID])
 }
+
 model OrderItems {
   OrderItemID String @id @default(cuid()) @map("_id")
   OrderID String
   Orders Orders @relation(fields: [OrderID], references: [OrderID])
   ProductID String
   Products Products @relation(fields: [ProductID], references: [ProductID])
-
   quantity Int // Number of ordered items
   unitPrice Float
 }
@@ -106,13 +102,14 @@ model Categories {
   name String 
   description String
 }
+
 model BlacklistToken {
   id        String   @id @default(cuid()) @map("_id")
   token     String   @unique
   createdAt DateTime @default(now())
 }
 
-model Agent{
+model Agent {
   AgentID String @id @default(cuid()) @map("_id")
   fullName String
   email String
@@ -121,21 +118,20 @@ model Agent{
   phoneNumber String
   WhyYouWantToBeACeeManAgent String
 }
+
 model Contact {
-   contactID String @id @default(cuid()) @map("_id")
-   name String
-   email String 
-   request String
+  contactID String @id @default(cuid()) @map("_id")
+  name String
+  email String 
+  request String
 }
 
 model location {
   locationID String @id @default(cuid()) @map("_id")
   UserID String
-    User User @relation(fields: [UserID], references: [UserID])
+  User User @relation(fields: [UserID], references: [UserID])
   state String
   city String
-    address  String
+  address  String
   phone_Number String
 }
-
-

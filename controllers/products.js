@@ -79,7 +79,6 @@ const viewProducts = async (req, res) => {
 
 
   const viewProduct = async(req, res)=>{
-    const userId = req.user.id
     const productId = req.params.productId
     try {
       const product = await getProduct(productId)

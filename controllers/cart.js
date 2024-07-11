@@ -1,33 +1,35 @@
-const { increaseCartItems, decreaseCartItems, createCart, getProduct, viewCartItems,getProductWithoutFormat, deleteItemsInCart, getTotalAmountInCart, getTotalCartItems, getUserById } = require("../db/user.db");
+const { increaseCartItems, decreaseCartItems, createOrUpdateCart, getProduct, viewCartItems,getProductWithoutFormat, deleteItemsInCart, getTotalAmountInCart, getTotalCartItems, getUserById } = require("../db/user.db");
 const { formatServerError, badRequest } = require("../helpers/error");
 
-//logic to add a product to the cart
-const newCart = async (req, res)=>{
-  const userId = req.user.id
-  const productId = req.params.id
-  const quantity = 1
+const newCart = async (req, res) => {
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
+  const productId = req.params.id;
+  const quantity = 1;
+
   try {
-    const getUser = await getUserById(userId)
     const getProductById = await getProduct(productId);
 
-    const freshCart = await createCart(userId, getProductById.ProductID,quantity, getProductById.price ) 
+    const freshCart = await createOrUpdateCart(userId || sessionId, getProductById.ProductID, quantity, getProductById.price);
 
     return res.status(200).json({
-      message:"Product successfully Added to cart",
+      message: "Product successfully added to cart",
       freshCart
-    })
+    });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json("server error")
+    console.log(error);
+    return res.status(500).json("Server error");
   }
-}
+};
+
 const increase_Item_Quantity = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
   const cartItemId = req.params.id;
   const { amount } = req.body;
 
   try {
-    const addedItems = await increaseCartItems(userId, cartItemId, amount);
+    const addedItems = await increaseCartItems(userId || sessionId, cartItemId, amount);
 
     if (!addedItems) {
       return res.status(400).json({ error: 'Product quantity could not be increased' });
@@ -50,12 +52,13 @@ const increase_Item_Quantity = async (req, res) => {
 };
 
 const decrease_item_quantity = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
   const cartItemId = req.params.id;
   const { amount } = req.body; // Correctly access amount from req.body
 
   try {
-    const removedItems = await decreaseCartItems(userId, cartItemId, amount);
+    const removedItems = await decreaseCartItems(userId || sessionId, cartItemId, amount);
 
     if (!removedItems) {
       return res.status(400).json({ error: 'Product quantity could not be decreased' });
@@ -84,9 +87,12 @@ const decrease_item_quantity = async (req, res) => {
 
 
 const viewCart = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
+
   try {
-    const view = await viewCartItems(userId);
+    const view = await viewCartItems(userId || sessionId);
+
     if (!view || view.length === 0) {
       return res.status(400).json({ error: 'No products in cart found' });
     }
@@ -106,7 +112,6 @@ const viewCart = async (req, res) => {
       cartItems: formattedView,
       totalAmount: formattedTotalAmount
     });
-    return;
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error' });

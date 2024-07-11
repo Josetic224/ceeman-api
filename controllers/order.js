@@ -6,25 +6,20 @@ const dotenv = require('dotenv')
 dotenv.config({path: ".env"})
 
 
-exports.createOrder = async(req, res)=>{
-  const userId = req.user.id
+exports.createOrder = async (req, res) => {
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
+
   try {
-
-    const {default: got} = await import("got")
-
     // Fetch user details
-    const user = await prisma.user.findUnique({
+    const user = userId ? await prisma.user.findUnique({
       where: { UserID: userId },
-      include: { location: true } // Include location to get the phone number
-    });
+      include: { location: true }
+    }) : null;
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found.' });
-    }
-
-    // Fetch cart items for the user
+    // Fetch cart items for the user or session
     const cartItems = await prisma.cartItems.findMany({
-      where: { UserID: userId },
+      where: { UserID: userId || sessionId },
       include: { Products: true }
     });
 
@@ -38,7 +33,7 @@ exports.createOrder = async(req, res)=>{
     // Create the order
     const order = await prisma.orders.create({
       data: {
-        UserID: userId,
+        UserID: userId || sessionId,
         orderDate: new Date(),
         total: BigInt(totalAmount),
         status: 'pending',
@@ -59,14 +54,14 @@ exports.createOrder = async(req, res)=>{
       currency: "NGN",
       redirect_url: "https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
       meta: {
-        consumer_id: user.UserID,
+        consumer_id: user ? user.UserID : sessionId,
         order_id: order.OrderID
       },
-      customer: {
+      customer: user ? {
         email: user.email,
-        phonenumber: user.location[0]?.phone_Number, // Assuming the user has at least one location
+        phonenumber: user.location[0]?.phone_Number,
         name: user.fullName
-      },
+      } :{},
       customizations: {
         title: "Royal-Ceeman Generators",
         logo: "https://res.cloudinary.com/doo97eq6b/image/upload/v1720138901/products/gcwykomlc3pmncnbtd6m.jpg"
@@ -83,7 +78,7 @@ exports.createOrder = async(req, res)=>{
 
     // Clear the user's cart after order creation
     await prisma.cartItems.deleteMany({
-      where: { UserID: userId }
+      where: { UserID: userId || sessionId }
     });
 
     // Return the response from Flutterwave API
@@ -92,7 +87,7 @@ exports.createOrder = async(req, res)=>{
     console.error(error);
     res.status(500).json({ error: 'An error occurred while creating the order.' });
   }
-}
+};
 
 exports.confirmOrder = async(req, res)=>{
   const payload = req.body
