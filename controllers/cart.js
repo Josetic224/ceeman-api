@@ -2,7 +2,7 @@ const { increaseCartItems, decreaseCartItems, createOrUpdateCart, getProduct, vi
 const { formatServerError, badRequest } = require("../helpers/error");
 
 const newCart = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
+  const userId = req.user.id
   const sessionId = req.cookies.sessionId;
   const productId = req.params.id;
   const quantity = 1;
@@ -10,7 +10,7 @@ const newCart = async (req, res) => {
   try {
     const getProductById = await getProduct(productId);
 
-    const freshCart = await createOrUpdateCart(userId || sessionId, getProductById.ProductID, quantity, getProductById.price);
+    const freshCart = await createOrUpdateCart(userId, getProductById.ProductID, quantity, getProductById.price);
 
     return res.status(200).json({
       message: "Product successfully added to cart",
@@ -23,13 +23,13 @@ const newCart = async (req, res) => {
 };
 
 const increase_Item_Quantity = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id
+  // const sessionId = req.cookies.sessionId;
   const cartItemId = req.params.id;
   const { amount } = req.body;
 
   try {
-    const addedItems = await increaseCartItems(userId || sessionId, cartItemId, amount);
+    const addedItems = await increaseCartItems(userId, cartItemId, amount);
 
     if (!addedItems) {
       return res.status(400).json({ error: 'Product quantity could not be increased' });
@@ -52,13 +52,13 @@ const increase_Item_Quantity = async (req, res) => {
 };
 
 const decrease_item_quantity = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id
+  // const sessionId = req.cookies.sessionId;
   const cartItemId = req.params.id;
   const { amount } = req.body; // Correctly access amount from req.body
 
   try {
-    const removedItems = await decreaseCartItems(userId || sessionId, cartItemId, amount);
+    const removedItems = await decreaseCartItems(userId, cartItemId, amount);
 
     if (!removedItems) {
       return res.status(400).json({ error: 'Product quantity could not be decreased' });
@@ -87,11 +87,11 @@ const decrease_item_quantity = async (req, res) => {
 
 
 const viewCart = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id
+  // const sessionId = req.cookies.sessionId;
 
   try {
-    const view = await viewCartItems(userId || sessionId);
+    const view = await viewCartItems(userId);
 
     if (!view || view.length === 0) {
       return res.status(400).json({ error: 'No products in cart found' });
@@ -120,11 +120,11 @@ const viewCart = async (req, res) => {
 
 
 const totalNumberOfCartItems = async (req, res) => {
-  const userId = req.user? req.user.id : null;
-  const sessionId = req.cookies.sessionId
+  const userId = req.user.id
+  // const sessionId = req.cookies.sessionId
 
   try {
-    const total = await getTotalCartItems(userId || sessionId);
+    const total = await getTotalCartItems(userId);
 
     return res.status(200).json({
       total
@@ -135,10 +135,10 @@ const totalNumberOfCartItems = async (req, res) => {
   }
 };
 const get_total_amount_in_cart = async (req, res) => {
-  const userId = req.user? req.user.id : null; // Assuming userId is retrieved from authenticated user
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id // Assuming userId is retrieved from authenticated user
+  // const sessionId = req.cookies.sessionId;
   try {
-    const totalAmount = await getTotalAmountInCart(userId || sessionId);
+    const totalAmount = await getTotalAmountInCart(userId);
 
     // Format totalAmount with Naira symbol
     const formattedTotalAmount = `₦${totalAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;

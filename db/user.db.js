@@ -72,7 +72,7 @@ const getUserByEmail =  async (email) =>
   await prisma.user.findUnique({ where: { email:email} });
 
 
-  const createUser = async (fullName, email, password, googleId= null) => {
+  const createUser = async (fullName, email, password, sessionId, googleId= null) => {
     try {
       const hashedPassword = hashSync(password, 10); // Hash the password securely
   
@@ -92,6 +92,32 @@ const getUserByEmail =  async (email) =>
         data: userData,
       });
   
+      const userId = newUser.UserID;
+
+      await prisma.cartItems.updateMany({
+        where:{UserID:sessionId},
+        data:{UserID:userId}
+      })
+
+      await prisma.location.updateMany({
+        where:{UserID:sessionId},
+        data:{
+          UserID:userId
+        }
+      })
+      // await prisma.orderItems.updateMany({
+      //   where:{UserID:sessionId},
+      //   data:{
+      //     UserID:userId
+      //   }
+      // })
+      // await prisma.orders.updateMany({
+      //   where:{UserID:sessionId},
+      //   data:{
+      //     UserID:userId
+      //   }
+      // })
+
       return newUser; // Return the newUser object
     } catch (error) {
       console.error('Error creating user:', error);

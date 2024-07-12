@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
   module.exports = router;
   
 router.get('/products/view/', viewProducts)
-router.get('/product/view/:productId', isAuthenticated, viewProduct)
+router.get('/product/view/:productId', viewProduct)
 
 module.exports = router
 

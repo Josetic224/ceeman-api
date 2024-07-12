@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const dotenv = require('dotenv');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const passport = require('passport');
 const { connectToDatabase, prisma } = require('../db/user.db.js');
 const googleRouter = require('../routers/api/router-google.js');
@@ -44,7 +45,10 @@ app.use(session({
   secret: process.env.session_Secret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
+  cookie: { secure: process.env.NODE_ENV === 'production' },
+  store: new MemoryStore({
+    checkPeriod: 86400000 // Clear expired sessions daily
+  })
 }));
 
 app.use((req, res, next) => {
@@ -53,6 +57,19 @@ app.use((req, res, next) => {
     res.cookie('sessionId', sessionId, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
   }
   next();
+});
+
+// Endpoint to clear session and cookie
+app.get('/clear-session-cookie', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      res.status(500).send('Failed to clear session and cookie');
+    } else {
+      res.clearCookie('sessionId');
+      res.send('Session and cookie cleared successfully');
+    }
+  });
 });
 
 // Passport initialization

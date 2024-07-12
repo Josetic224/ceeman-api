@@ -36,12 +36,12 @@ const fetchStateLGA = async (req, res) => {
 };
 
 const userlocation = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id
+  // const sessionId = req.cookies.sessionId;
   const { state, city, address, phone_Number } = req.body;
   
   try {
-    const userLocation = await saveLocation(userId || sessionId, state, city, address, phone_Number);
+    const userLocation = await saveLocation(userId, state, city, address, phone_Number);
     res.status(200).json({
       message: "Location Saved Successfully",
       userLocation,

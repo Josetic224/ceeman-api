@@ -7,6 +7,7 @@ const {userSchema} = require('../validations/user')
 
 exports.signUp = async (req, res)=>{
 const body = userSchema.safeParse(req.body)
+const sessionId = req.cookies.sessionId;
 if (!body.success) {
     return res.status(400).json({
       errors: body.error.issues,
@@ -19,7 +20,14 @@ if (!body.success) {
         if(checkUser){
             return badRequest(res, "email already in use")
         }
-     const newUser = await createUser(fullName, email, password, googleId);
+     const newUser = await createUser(fullName, email, password, googleId, sessionId);
+
+      // Clear the sessionId cookie if desired
+    res.clearCookie('sessionId');
+
+    // Optionally, create a new session for the user and send a userId cookie
+    req.session.userId = newUser.UserID; // Assuming you use session-based authentication
+    res.cookie('userId', newUser.UserID, { httpOnly: true, secure: true });
 
  await sendEmail({
     email:email,

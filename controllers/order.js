@@ -1,25 +1,23 @@
 const {PrismaClient} = require('@prisma/client')
-
+const axios = require('axios')
 const prisma = new PrismaClient()
-
 const dotenv = require('dotenv')
 dotenv.config({path: ".env"})
 
 
 exports.createOrder = async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const sessionId = req.cookies.sessionId;
+  const userId = req.user.id;
 
   try {
     // Fetch user details
-    const user = userId ? await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { UserID: userId },
       include: { location: true }
-    }) : null;
+    });
 
-    // Fetch cart items for the user or session
+    // Fetch cart items for the user
     const cartItems = await prisma.cartItems.findMany({
-      where: { UserID: userId || sessionId },
+      where: { UserID: userId },
       include: { Products: true }
     });
 
@@ -33,7 +31,7 @@ exports.createOrder = async (req, res) => {
     // Create the order
     const order = await prisma.orders.create({
       data: {
-        UserID: userId || sessionId,
+        UserID: userId,
         orderDate: new Date(),
         total: BigInt(totalAmount),
         status: 'pending',
@@ -54,14 +52,14 @@ exports.createOrder = async (req, res) => {
       currency: "NGN",
       redirect_url: "https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
       meta: {
-        consumer_id: user ? user.UserID : sessionId,
+        consumer_id: user.UserID,
         order_id: order.OrderID
       },
-      customer: user ? {
+      customer: {
         email: user.email,
         phonenumber: user.location[0]?.phone_Number,
         name: user.fullName
-      } :{},
+      },
       customizations: {
         title: "Royal-Ceeman Generators",
         logo: "https://res.cloudinary.com/doo97eq6b/image/upload/v1720138901/products/gcwykomlc3pmncnbtd6m.jpg"
@@ -69,25 +67,30 @@ exports.createOrder = async (req, res) => {
     };
 
     // Call Flutterwave API to initiate payment
-    const response = await got.post("https://api.flutterwave.com/v3/payments", {
-      headers: {
-        Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`
-      },
-      json: paymentData
-    }).json();
+    const response = await axios.post(
+      "https://api.flutterwave.com/v3/payments",
+      paymentData,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     // Clear the user's cart after order creation
     await prisma.cartItems.deleteMany({
-      where: { UserID: userId || sessionId }
+      where: { UserID: userId }
     });
 
     // Return the response from Flutterwave API
-    res.status(201).json(response);
+    res.status(201).json(response.data);
   } catch (error) {
-    console.error(error);
+    console.error('Error:', error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'An error occurred while creating the order.' });
   }
 };
+
 
 exports.confirmOrder = async(req, res)=>{
   const payload = req.body
