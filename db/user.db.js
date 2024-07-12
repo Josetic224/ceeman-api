@@ -515,9 +515,44 @@ const createContact = async (name, email, request)=>{
   }
 }
 
+const createAgent = async(data)=>{
+  try {
+    return await prisma.agent.create({data})
+  } catch (error) {
+    throw new Error("failed to create Agent")
+  }
+}
 
+const getAgentById = async (id) => {
+  return await prisma.agent.findUnique({
+    where: { AgentID: id }
+  });
+};
+
+
+exports.getAllAgents = async () => {
+  return await prisma.agent.findMany();
+};
+
+
+exports.updateAgent = async (id, data) => {
+  return await prisma.agent.update({
+    where: { AgentID: id },
+    data
+  });
+};
+
+
+
+exports.deleteAgent = async (id) => {
+  return await prisma.agent.delete({
+    where: { AgentID: id }
+  });
+};
 
    module.exports = {
+    getAgentById,
+    createAgent,
     createContact,
     saveLocation,
     getTotalCartItems,
