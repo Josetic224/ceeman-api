@@ -120,10 +120,11 @@ const viewCart = async (req, res) => {
 
 
 const totalNumberOfCartItems = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user? req.user.id : null;
+  const sessionId = req.cookies.sessionId
 
   try {
-    const total = await getTotalCartItems(userId);
+    const total = await getTotalCartItems(userId || sessionId);
 
     return res.status(200).json({
       total
@@ -134,10 +135,10 @@ const totalNumberOfCartItems = async (req, res) => {
   }
 };
 const get_total_amount_in_cart = async (req, res) => {
-  const userId = req.user.id; // Assuming userId is retrieved from authenticated user
-
+  const userId = req.user? req.user.id : null; // Assuming userId is retrieved from authenticated user
+  const sessionId = req.cookies.sessionId;
   try {
-    const totalAmount = await getTotalAmountInCart();
+    const totalAmount = await getTotalAmountInCart(userId || sessionId);
 
     // Format totalAmount with Naira symbol
     const formattedTotalAmount = `₦${totalAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;

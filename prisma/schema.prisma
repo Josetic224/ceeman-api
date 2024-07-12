@@ -13,7 +13,7 @@ model User {
   email    String  @unique
   password String?
   googleId  String?
-  Session  Session[]
+  // Session  Session[]
   Orders Orders[]
   Reviews Reviews[]
   cartItems CartItems[]
@@ -21,13 +21,13 @@ model User {
   role    String   @default("user") // Role can be "user" or "admin"
 }
 
-model Session {
-  id       String   @id @default(cuid()) @map("_id")
-  userId   String
-  User     User  @relation(fields: [userId], references: [UserID])
-  token     String
-  expires  DateTime
-}
+// model Session {
+//   id       String   @id @default(cuid()) @map("_id")
+//   userId   String
+//   User     User  @relation(fields: [userId], references: [UserID])
+//   token     String
+//   expires  DateTime
+// }
 
 model Products {
   ProductID String @id @default(cuid()) @map("_id")
@@ -35,6 +35,8 @@ model Products {
   description String
   price Float
   category String @default("generators")
+  Features String
+  IdealFor String
   imageUrl String[]
   orderItems OrderItems[]
   Reviews Reviews[]
@@ -63,7 +65,6 @@ model CartItems {
   UserID String
   User User @relation(fields: [UserID], references: [UserID])
   ProductID String
-  SessionId String
   Products Products @relation(fields: [ProductID], references: [ProductID])
   quantity Int @default(1)
   unitPrice Float
@@ -128,8 +129,8 @@ model Contact {
 
 model location {
   locationID String @id @default(cuid()) @map("_id")
-  UserID String
-  User User @relation(fields: [UserID], references: [UserID])
+  UserID String?
+  User User? @relation(fields: [UserID], references: [UserID])
   state String
   city String
   address  String

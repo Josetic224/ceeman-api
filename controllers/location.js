@@ -35,22 +35,24 @@ const fetchStateLGA = async (req, res) => {
   }
 };
 
-const userlocation = async(req, res)=>{
-  const userId = req.user.id
+const userlocation = async (req, res) => {
+  const userId = req.user ? req.user.id : null;
+  const sessionId = req.cookies.sessionId;
   const { state, city, address, phone_Number } = req.body;
+  
   try {
-    const userLocation = await saveLocation(userId,state, city, address, phone_Number )
+    const userLocation = await saveLocation(userId || sessionId, state, city, address, phone_Number);
     res.status(200).json({
-      message: "Location Saved Succeessfully",
-      userLocation
-    })
+      message: "Location Saved Successfully",
+      userLocation,
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({
-      message:"server error"
-    })
+      message: "Server error",
+    });
   }
-}
+};
 module.exports={
     getStates,
     fetchStateLGA,

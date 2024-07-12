@@ -132,7 +132,7 @@ const uploadImageToCloudinary = async (filePath) => {
 };
 
 //create a Product
-const createProduct = async (name, description, price, imageUrls) => {
+const createProduct = async (name, description, Features, IdealFor,  price, imageUrls) => {
   try {
     // Remove commas and currency symbol, if any, and convert to float
     const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
@@ -142,6 +142,8 @@ const createProduct = async (name, description, price, imageUrls) => {
       data: {
         name,
         description,
+        Features,
+        IdealFor,
         imageUrl: imageUrls, // Ensure this is an array of strings
         price: parseFloat(numericPrice.toFixed(2)), // Store price as float with 2 decimal places
       },
@@ -266,6 +268,7 @@ const createOrUpdateCart = async (userIdOrSessionId, productId, quantity, unitPr
       return newCartItem;
     }
   } catch (error) {
+    console.error(error)
     throw new Error('Error adding to cart!');
   }
 };
@@ -419,10 +422,12 @@ const getTotalCartItems = async (userId) => {
   }
 };
 
-const getTotalAmountInCart = async () => {
+const getTotalAmountInCart = async (userId) => {
   try {
     // Find all cart items for the user
-    const cartItems = await prisma.cartItems.findMany();
+    const cartItems = await prisma.cartItems.findMany({
+      where: {UserID : userId}
+    });
 
     if (!cartItems || cartItems.length === 0) {
       return 0; // If no items in cart, return 0
@@ -441,28 +446,33 @@ const getTotalAmountInCart = async () => {
   }
 };
 
-const saveLocation = async(userId,state, city, address, phone_Number) =>{
+
+const saveLocation = async (userId, state, city, address, phone_Number) => {
   try {
+    // const data = {
+    //   state,
+    //   city,
+    //   address,
+    //   phone_Number: phone_Number,
+    //   SessionId: sessionId || undefined, // Ensure to only include sessionId if present
+    // };
+
     const location = await prisma.location.create({
-      data: {
+      data:{
+        UserID:userId,
         state:state,
         city:city,
         address:address,
-        phone_Number:phone_Number, // Assuming you have this in the request body as well
-        User:{
-          connect:{
-            UserID:userId
-          }
-        }
+        phone_Number:phone_Number
       }
     });
 
-   return location
+    return location;
   } catch (error) {
     console.error('Error saving location:', error);
     throw new Error('Failed to save location');
   }
-}
+};
 
 const createContact = async (name, email, request)=>{
   try {

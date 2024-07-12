@@ -6,6 +6,6 @@ const router = express.Router()
 
 router.get('/states', getStates)
 router.get('/states/:stateName/cities', fetchStateLGA)
-router.post('/location/save', isAuthenticated,userlocation)
+router.post('/location/save',userlocation)
 
 module.exports= router

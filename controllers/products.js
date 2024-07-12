@@ -5,7 +5,7 @@ const prisma = new PrismaClient
 
 const createProductController = async (req, res) => {
   const userId = req.user.id;
-  const { name, description, price } = req.body;
+  const { name, description, Features, IdealFor, price, } = req.body;
 
   try {
     console.log('Uploaded files:', req.files); // Log uploaded files
@@ -26,7 +26,7 @@ const createProductController = async (req, res) => {
     const imageUrls = await Promise.all(req.files.map(file => uploadImageToCloudinary(file.path)));
 
     // Create product
-    const newProduct = await createProduct(name, description, price, imageUrls);
+    const newProduct = await createProduct(name, description, Features, IdealFor, price, imageUrls);
     console.log(newProduct);
 
     res.status(201).json(newProduct);
