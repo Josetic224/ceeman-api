@@ -14,10 +14,9 @@ const { v4: uuidv4 } = require('uuid');
 // Load environment variables
 dotenv.config({ path: ".env" });
 
-// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    if (origin === "http://localhost:5173" || !origin) {
+    if (origin === "http://localhost:5173" || origin === "https://ceee-man.vercel.app" || !origin) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -31,6 +30,7 @@ const corsOptions = {
     "Access-Control-Allow-Credentials",
   ],
 };
+
 
 // Middleware setup
 app.use(cors(corsOptions));
