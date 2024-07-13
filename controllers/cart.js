@@ -44,10 +44,8 @@ const increase_Item_Quantity = async (req, res) => {
     res.status(200).json({
       message: 'Product quantity increased successfully',
       addedItems: {
-        formattedAddedItems
-      } 
-
-      
+        formattedAddedItems,
+      },
     });
   } catch (error) {
     console.error(error);

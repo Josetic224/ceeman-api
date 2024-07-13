@@ -72,21 +72,21 @@ const generateDynamicEmail = (name)=>{
     <body>
         <div class="email-container">
             <div class="header">
-                <img src="your-logo-url.png" alt="PlaintiffAid">
-                <h1>PlaintiffAid</h1>
+                <img src="../utils/WhatsApp Image 2024-07-13 at 12.31.40_8a2d7a94.jpg" alt="Royalceeman">
+                <h1>Ceeman Generators</h1>
             </div>
             <div class="content">
                 <h2>THANKS FOR SIGNING UP!</h2>
-                <p>Welcome to PlaintiffAid</p>
+                <p>Thanks for choosing Ceeman Generators</p>
                 <p>Hi ${name},</p>
-                <p>We're excited to have you on board. Explore our exclusive legal services and enjoy the benefits of being a part of the PlaintiffAid community!</p>
+                <p>We're excited to have you on board. Explore our exclusive and affordable Power-Gnerating Services and Equipments and enjoy the benefits of being a part of the Ceeman community!</p>
                 <p>Thanks,</p>
-                <p>The Company Team</p>
+                <p>The Royal Ceeman Team</p>
             </div>
             <div class="footer">
                 <p>Get in touch</p>
                 <p>+234 706 284 8038</p>
-                <p><a href="https://plaintiffaid.vercel.com">www.plaintiffaid.vercel.com</a></p>
+                <p><a href="https://royalceeman.com">www.plaintiffaid.vercel.com</a></p>
                 <div class="social-icons">
                     <a href="https://www.facebook.com">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.791 4.658-4.791 1.325 0 2.463.099 2.794.143v3.24l-1.918.001c-1.504 0-1.794.715-1.794 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.107c.73 0 1.324-.593 1.324-1.324V1.325C24 .593 23.407 0 22.675 0z"/></svg>
