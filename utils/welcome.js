@@ -72,7 +72,7 @@ const generateDynamicEmail = (name)=>{
     <body>
         <div class="email-container">
             <div class="header">
-                <img src="./ceeman.jpg" alt="Royalceeman">
+                <img src="https://ceee-man.vercel.app/assets/2_20240611_041530_0001-BRsoDga6.svg" alt="Royalceeman">
                 <h1>Ceeman Generators</h1>
             </div>
             <div class="content">
