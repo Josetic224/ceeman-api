@@ -16,24 +16,33 @@ dotenv.config({ path: ".env" });
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (origin === "http://localhost:5173" || origin === "https://ceee-man.vercel.app" || origin === "https://royalceeman.com"  ||  !origin) {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://ceee-man.vercel.app",
+      "https://royalceeman.com"
+    ];
+    
+    if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
     "Authorization",
     "Access-Control-Allow-Credentials",
+    "X-Requested-With"
   ],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
 
 
 // Middleware setup
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
