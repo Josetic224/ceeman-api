@@ -19,7 +19,7 @@ const corsOptions = {
     const allowedOrigins = [
       "http://localhost:5173",
       "https://ceee-man.vercel.app",
-      "https://royalceeman.com"
+      "https://www.royalceeman.com"
     ];
     
     console.log("Origin:", origin); // Log the origin of the incoming request
