@@ -16,7 +16,7 @@ dotenv.config({ path: ".env" });
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (origin === "http://localhost:5173" || origin === "https://ceee-man.vercel.app" || !origin) {
+    if (origin === "http://localhost:5173" || origin === "https://ceee-man.vercel.app" || origin === "https://royalceeman.com"  ||  !origin) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
