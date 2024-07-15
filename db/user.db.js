@@ -320,7 +320,7 @@ const viewCartItems = async (userIdOrSessionId) => {
 
 
 
-const increaseCartItems = async (userId, cartItemId, amount) => {
+const increaseCartItems = async (userId, cartItemId) => {
   try {
     // Find the cart item by cartItemId
     let cartItem = await prisma.cartItems.findUnique({
@@ -337,7 +337,7 @@ const increaseCartItems = async (userId, cartItemId, amount) => {
     cartItem = await prisma.cartItems.update({
       where: { CartItemID: cartItem.CartItemID },
       data: {
-        quantity: cartItem.quantity + amount,
+        quantity: cartItem.quantity + 1,
         unitPrice: cartItem.unitPrice // Adjust unit price based on new quantity
       },
     });

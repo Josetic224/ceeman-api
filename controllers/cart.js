@@ -26,10 +26,9 @@ const increase_Item_Quantity = async (req, res) => {
   const userId = req.user.id
   // const sessionId = req.cookies.sessionId;
   const cartItemId = req.params.id;
-  const { amount } = req.body;
 
   try {
-    const addedItems = await increaseCartItems(userId, cartItemId, amount);
+    const addedItems = await increaseCartItems(userId, cartItemId);
 
     if (!addedItems) {
       return res.status(400).json({ error: 'Product quantity could not be increased' });
