@@ -72,14 +72,14 @@ const generateDynamicEmail = (name)=>{
     <body>
         <div class="email-container">
             <div class="header">
-                <img src="https://ceee-man.vercel.app/assets/2_20240611_041530_0001-BRsoDga6.svg" alt="Royalceeman">
+                <img src="https://royalceeman.com/assets/Ceeman%20logo%20white%20BLUE%201-CDVDVfUd.svg" alt="Royalceeman">
                 <h1>Ceeman Generators</h1>
             </div>
             <div class="content">
                 <h2>THANKS FOR SIGNING UP!</h2>
                 <p>Thanks for choosing Ceeman Generators</p>
                 <p>Hi ${name},</p>
-                <p>We're excited to have you on board. Explore our exclusive and affordable Power-Gnerating Services and Equipments and enjoy the benefits of being a part of the Ceeman community!</p>
+                <p>We're excited to have you on board. Explore our exclusive and affordable Power-Generating Services and Equipments and enjoy the benefits of being a part of the Ceeman community!</p>
                 <p>Thanks,</p>
                 <p>The Royal Ceeman Team</p>
             </div>
