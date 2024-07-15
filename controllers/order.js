@@ -50,7 +50,7 @@ exports.createOrder = async (req, res) => {
       tx_ref: `order-${order.OrderID}`,
       amount: totalAmount.toString(),
       currency: "NGN",
-      redirect_url: "https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+      redirect_url: "https://ceeman-back.onrender.com/api/webhooks/flutterwave",
       meta: {
         consumer_id: user.UserID,
         order_id: order.OrderID
