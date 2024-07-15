@@ -22,6 +22,8 @@ const corsOptions = {
       "https://royalceeman.com"
     ];
     
+    console.log("Origin:", origin); // Log the origin of the incoming request
+    
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
@@ -39,10 +41,8 @@ const corsOptions = {
   optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
 
-
-// Middleware setup
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable pre-flight across-the-board
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
