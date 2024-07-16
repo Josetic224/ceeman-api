@@ -92,6 +92,25 @@ exports.createOrder = async (req, res) => {
 };
 
 
+exports.orderSuccess = async (req, res) =>{
+  res.status(200).send(`
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+  </head>
+  <body>
+    <h1>Payment Successful</h1>
+    <p>Thank you for your payment!</p>
+    <p>You can close this window and return to the application.</p>
+  </body>
+  </html>
+`);
+}
+
 exports.confirmOrder = async(req, res)=>{
   const payload = req.body
   const signature = req.headers['verif-hash']
