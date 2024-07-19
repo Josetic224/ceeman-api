@@ -1,7 +1,19 @@
 const {getUserByEmail, comparePassword, loginUser } = require('../db/user.db');
 const {LoginUserSchema} = require('../validations/user')
+const rateLimit = require('express-rate-limit')
 
-const logIn = async(req, res) =>{
+
+
+exports.loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login attempts per windowMs
+    message: 'Too many login attempts from this IP, please try again later.',
+    handler: (req, res) => {
+        res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
+    },
+});
+
+exports.logIn = async(req, res) =>{
     const body = LoginUserSchema.safeParse(req.body)
     if(!body.success){
         return res.status(400).json({
@@ -29,6 +41,3 @@ const logIn = async(req, res) =>{
 }
 
 
-module.exports ={
-    logIn
-}

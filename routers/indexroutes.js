@@ -1,13 +1,13 @@
 const express = require('express');
 
 const signupRouter = require('./api/signup');
-const loginRouter = require('./api/login');
 const productRouter = require('./api/products')
 const cartRouter = require('./api/cart')
 const locationRouter = require('./api/location')
 const orderRouter = require('./api/order')
 const contactRouter = require('./api/contact')
-const AgentRouter = require('./api/agent')
+const AgentRouter = require('./api/agent');
+const { loginLimiter, logIn } = require('../controllers/login');
 
 
 
@@ -16,7 +16,7 @@ module.exports = function routes(app) {
   
     // Registration & authentication routes.
     app.use("/api", signupRouter);
-    app.use("/api", loginRouter);
+    app.use("/api", loginLimiter, logIn);
     app.use("/api", productRouter);
     app.use("/api", cartRouter );
     app.use("/api", locationRouter);

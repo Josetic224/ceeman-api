@@ -22,6 +22,7 @@
     "country-state-city": "^3.2.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
     "express-session": "^1.18.0",
     "flutterwave-node-v3": "^1.1.10",
     "got": "^14.4.1",
