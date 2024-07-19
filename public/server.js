@@ -24,7 +24,6 @@ const corsOptions = {
 
     ];
     
-    console.log("Origin:", origin); // Log the origin of the incoming request
     
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
@@ -74,7 +73,6 @@ app.use((req, res, next) => {
 app.get('/clear-session-cookie', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      console.error('Error destroying session:', err);
       res.status(500).send('Failed to clear session and cookie');
     } else {
       res.clearCookie('sessionId');
@@ -100,9 +98,7 @@ async function startApp() {
   try {
     await connectToDatabase();
     const users = await prisma.user.findMany();
-    console.log('users:', users);
   } catch (error) {
-    console.error('Error starting the application:', error);
   } finally {
     await prisma.$disconnect();
   }
@@ -113,5 +109,4 @@ startApp();
 // Server listening
 const PORT = process.env.PORT || 3001; // Use 3001 as default if PORT is not set
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
 });
