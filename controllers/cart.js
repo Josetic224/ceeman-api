@@ -17,7 +17,6 @@ const newCart = async (req, res) => {
       freshCart
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json("Server error");
   }
 };
@@ -47,7 +46,6 @@ const increase_Item_Quantity = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ error: 'Server error: Cart Item not Found' });
   }
 };
@@ -81,7 +79,6 @@ const decrease_item_quantity = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ error: 'Server error' });
   }
 };
@@ -114,7 +111,6 @@ const viewCart = async (req, res) => {
       totalAmount: formattedTotalAmount
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ error: 'Server error' });
   }
 };
@@ -131,7 +127,6 @@ const totalNumberOfCartItems = async (req, res) => {
       total
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ error: 'Server error' });
   }
 };
@@ -146,7 +141,6 @@ const get_total_amount_in_cart = async (req, res) => {
 
     res.status(200).json({ totalAmount: formattedTotalAmount });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -163,7 +157,6 @@ const delete_cart_item = async (req, res) => {
       result
     }); // Send success message or error message if any
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 };

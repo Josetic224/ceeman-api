@@ -8,7 +8,6 @@ exports.loginSuccess = (req, res) => {
   } else {
     res.redirect('/');
   }
-  console.log("Authentication Successful");
 };
 
 exports.loginFailure = (req, res) => {

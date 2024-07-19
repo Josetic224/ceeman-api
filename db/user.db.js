@@ -12,11 +12,7 @@ const prisma = new PrismaClient();
 async function connectToDatabase() {
     try {
         await prisma.$connect();
-        console.log('Connected to the database');
     } catch (error) {
-        console.error('Error connecting to the database:', error.message);
-        // Retry mechanism
-        console.log('Retrying connection...');
         await retryConnection(3); // Retry 3 times
     }
   }
@@ -26,19 +22,15 @@ async function connectToDatabase() {
     for (let i = 0; i < retries; i++) {
         try {
             await prisma.$connect();
-            console.log('Connected to the database');
             return; // Connection successful, exit retry loop
         } catch (error) {
-            console.error('Error connecting to the database:', error.message);
             if (i < retries - 1) {
                 // Delay before retrying
                 const delay = Math.pow(2, i) * 1000; // Exponential backoff
-                console.log(`Retrying in ${delay} milliseconds...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
     }
-    console.error('Unable to connect to the database after retrying');
 }
 
 
@@ -85,7 +77,6 @@ const getUserByEmail =  async (email) =>
         role: "user",
         googleId: googleId, // Ensure googleId is null if not provided
       };
-      console.log(userData)
   
       // Create new user in the database
       const newUser = await prisma.user.create({
@@ -120,7 +111,6 @@ const getUserByEmail =  async (email) =>
 
       return newUser; // Return the newUser object
     } catch (error) {
-      console.error('Error creating user:', error);
       throw new Error('Failed to create user.');
     } finally {
       await prisma.$disconnect(); // Disconnect from the database after operation
@@ -152,7 +142,6 @@ const uploadImageToCloudinary = async (filePath) => {
     });
     return result.secure_url;
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
     throw new Error("Failed to upload image to Cloudinary");
   }
 };
@@ -177,20 +166,11 @@ const createProduct = async (name, description, Features, IdealFor,  price, imag
 
     return newProduct;
   } catch (error) {
-    console.error('Error creating product:', error.message);
     throw error;
   }
 };
 
 
-// // Example usage
-// createProduct('Product Name', 'Product Description', '₦1,200.50', 'Electronics', 'example.jpg')
-//   .then(product => {
-//     console.log('Product created:', product);
-//   })
-//   .catch(error => {
-//     console.error('Error creating product:', error);
-//   });
 
 const getProduct = async (productId) => {
   try {
@@ -213,7 +193,6 @@ const getProduct = async (productId) => {
       price: formattedPrice // Overwrite the price field with the formatted price
     };
   } catch (error) {
-    console.error('Error retrieving product:', error.message);
     throw new Error('No Product Found');
   }
 };
@@ -232,7 +211,6 @@ const getProductWithoutFormat = async (productId) => {
 
     return product;
   } catch (error) {
-    console.error('Error retrieving product:', error.message);
     throw new Error('No Product Found');
   }
 };
@@ -294,7 +272,6 @@ const createOrUpdateCart = async (userIdOrSessionId, productId, quantity, unitPr
       return newCartItem;
     }
   } catch (error) {
-    console.error(error)
     throw new Error('Error adding to cart!');
   }
 };
@@ -329,7 +306,6 @@ const increaseCartItems = async (userId, cartItemId) => {
     });
 
     if (!cartItem || cartItem.UserID !== userId) {
-      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
       throw new Error('Cart item not found');
     }
 
@@ -345,7 +321,6 @@ const increaseCartItems = async (userId, cartItemId) => {
     // Return the updated cart item
     return cartItem;
   } catch (error) {
-    console.error(error);
     throw new Error('Internal server error');
   }
 };
@@ -360,7 +335,6 @@ const decreaseCartItems = async (userIdOrSessionId, cartItemId, amount) => {
     });
 
     if (!cartItem || cartItem.UserID !== userIdOrSessionId) {
-      console.error(`Cart item with ID ${cartItemId} not found for user or session ${userIdOrSessionId}`);
       throw new Error('Cart item not found');
     }
 
@@ -400,7 +374,6 @@ const decreaseCartItems = async (userIdOrSessionId, cartItemId, amount) => {
 
     return updatedCartItem || { message: 'Item removed from cart' };
   } catch (error) {
-    console.error(error);
     throw new Error('Internal server error');
   }
 };
@@ -414,7 +387,6 @@ const deleteItemsInCart = async (userId, cartItemId) => {
 
     // If cart item is not found or doesn't belong to the user, throw an error
     if (!cartItem || cartItem.UserID !== userId) {
-      console.error(`Cart item with ID ${cartItemId} not found for user ${userId}`);
       throw new Error('Cart item not found');
     }
 
@@ -427,7 +399,6 @@ const deleteItemsInCart = async (userId, cartItemId) => {
 
     return  deleteItems;
   } catch (error) {
-    console.error(error.message);
     throw new Error('Failed to delete item from cart');
   }
 };
@@ -443,7 +414,6 @@ const getTotalCartItems = async (userId) => {
 
     return totalItems;
   } catch (error) {
-    console.error(error);
     throw new Error('Failed to retrieve total number of items');
   }
 };
@@ -467,7 +437,6 @@ const getTotalAmountInCart = async (userId) => {
 
     return totalAmount;
   } catch (error) {
-    console.error(error);
     throw new Error('Failed to calculate total amount in cart');
   }
 };
@@ -495,7 +464,6 @@ const saveLocation = async (userId, state, city, address, phone_Number) => {
 
     return location;
   } catch (error) {
-    console.error('Error saving location:', error);
     throw new Error('Failed to save location');
   }
 };

@@ -86,7 +86,6 @@ exports.createOrder = async (req, res) => {
     // Return the response from Flutterwave API
     res.status(201).json(response.data);
   } catch (error) {
-    console.error('Error:', error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'An error occurred while creating the order.' });
   }
 };
@@ -132,7 +131,6 @@ exports.confirmOrder = async(req, res)=>{
     res.status(400).send('Event not handled');
   }
   } catch (error) {
-    console.error(error);
     res.status(500).json("server error")
   }
   

@@ -60,7 +60,6 @@ exports.createAgent = async (req, res) => {
   
       res.status(201).json(newAgent);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error: 'An error occurred while creating the agent.' });
     }
   };
@@ -76,7 +75,6 @@ exports.createAgent = async (req, res) => {
       }
       res.status(200).json(agent);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error: 'An error occurred while fetching the agent.' });
     }
   };
@@ -87,7 +85,6 @@ exports.getAllAgents = async (req, res) => {
       const agents = await getAllAgents();
       res.status(200).json(agents);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error: 'An error occurred while fetching agents.' });
     }
   };
@@ -109,7 +106,6 @@ exports.updateAgent = async (req, res) => {
       });
       res.status(200).json(updatedAgent);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error: 'An error occurred while updating the agent.' });
     }
   };
@@ -123,7 +119,6 @@ exports.deleteAgent = async (req, res) => {
       await agentService.deleteAgent(id);
       res.status(200).json({ message: 'Agent deleted successfully.' });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error: 'An error occurred while deleting the agent.' });
     }
   };

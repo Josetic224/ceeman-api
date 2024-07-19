@@ -9,7 +9,6 @@ const logIn = async(req, res) =>{
         })
     }
     const {email, password} = body.data;
-    console.log(body.data)
     try {
     let existingUser =  await getUserByEmail(email)
      
@@ -23,7 +22,6 @@ const logIn = async(req, res) =>{
     }) ;
 
     } catch (error) {
-        console.log(error)
         return res.status(500).json({
             message:error.message
         })

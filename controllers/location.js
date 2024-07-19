@@ -12,7 +12,6 @@ const getStates = async(req, res)=>{
  const viewStates = Country.states()
 res.status(200).json(viewStates)
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Failed to fetch state details' });
   }
 }
@@ -30,7 +29,6 @@ const fetchStateLGA = async (req, res) => {
 
     res.status(200).json(viewLga.lgas); // Send LGAs as JSON response
   } catch (error) {
-    console.error('Error fetching state LGAs:', error);
     res.status(500).json({ error: 'Failed to fetch state LGAs' });
   }
 };
@@ -47,7 +45,6 @@ const userlocation = async (req, res) => {
       userLocation,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       message: "Server error",
     });

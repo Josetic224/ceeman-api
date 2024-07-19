@@ -21,7 +21,6 @@ const unAuthorized = (res) => {
   };
   
   const formatServerError = (res, message, error) => {
-    console.log(message, error);
     res.status(500).json({ errors: [{ error: "Server Error" }] });
   };
   
