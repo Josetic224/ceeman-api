@@ -18,6 +18,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:5173",
+      "http://localhost:3000"
       "https://ceee-man.vercel.app",
       "https://www.royalceeman.com",
       "https://royalceeman.com",
